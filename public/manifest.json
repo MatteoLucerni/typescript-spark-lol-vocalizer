@@ -105,6 +105,9 @@
       "enable_auto_refresh": true,
       "reload_delay": 1000,
       "filter": "*.*"
-    }
+    },
+    "files": [
+      "assets/dragon.mp3"
+    ]
   }
 }
