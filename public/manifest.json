@@ -16,7 +16,7 @@
   "permissions": [
     "Hotkeys",
     "GameInfo",
-    "overwolf.games.events"
+    "GameEvents"
   ],
   "data": {
     "start_window": "background",
