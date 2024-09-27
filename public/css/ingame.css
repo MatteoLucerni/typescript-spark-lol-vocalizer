@@ -1,0 +1,220 @@
+/* Stili Generali */
+body {
+  background-color: #333333;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  min-height: 100vh;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  /* Assicurati che il font sia coerente */
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2c2c2c;
+  padding: 10px 20px;
+  border-bottom: 2px solid #444;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.hotkey-text {
+  margin-right: 20px;
+  font-size: 1em;
+}
+
+.window-controls-group {
+  display: flex;
+}
+
+.window-control {
+  width: 16px;
+  height: 16px;
+  margin-left: 10px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  border: none;
+  cursor: pointer;
+}
+
+.window-control-minimize {
+  background-image: url('../../img/minimize.svg');
+}
+
+.window-control-maximize {
+  background-image: url('../../img/maximize.svg');
+}
+
+.window-control-close {
+  background-image: url('../../img/close.svg');
+}
+
+/* Main */
+main {
+  display: flex;
+  flex: 1;
+  position: relative;
+  padding: 38px;
+  box-sizing: border-box;
+}
+
+#logs {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 30px;
+  /* Aggiungi spazio tra le colonne */
+}
+
+/* Log Columns */
+.logColumn {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 50%;
+  /* Imposta un'altezza massima per le colonne */
+  max-height: 90vh;
+  /* Puoi regolare questo valore secondo le tue esigenze */
+  overflow: auto;
+  width: 100%;
+  /* Permetti lo scorrimento verticale */
+  white-space: nowrap;
+}
+
+/* Titoli delle Colonne */
+.logColumn h1 {
+  font-family: "Roboto Mono", monospace;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  color: #d5d5d5;
+  margin: 0 0 10px 0;
+  /* Aggiungi margine inferiore per separare dal contenuto */
+  border-bottom: 1px solid #555;
+  /* Linea di separazione sotto il titolo */
+  padding-bottom: 5px;
+}
+
+/* Contenuto dei Log */
+.dataText {
+  background-color: #464646;
+  border-radius: 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* Permetti lo scorrimento verticale */
+  white-space: nowrap;
+  padding: 10px;
+  margin-top: 16px;
+  color: #8d8d8d;
+  /* Rimuovi altezza fissa e lascia che Flexbox gestisca l'altezza */
+  height: auto;
+  max-height: 60vh;
+  /* Imposta un'altezza massima per gestire overflow */
+  font-size: 13px;
+}
+
+/* Stili per i Singoli Eventi */
+.dataText div {
+  margin-bottom: 5px;
+  padding: 5px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+  font-size: 0.9em;
+  word-break: break-word;
+  /* Assicura che il testo si adatti al contenitore */
+}
+
+/* Scrollbar Personalizzata */
+.dataText::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dataText::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dataText::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+
+/* Pulsante Copia Log */
+button.logCopy {
+  background: #464646;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  color: #d5d5d5;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 12px;
+  line-height: 120%;
+  padding: 6px 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+button.logCopy:hover {
+  background: #8d8d8d;
+  color: #ffffff;
+}
+
+/* Altri Stili Esistenti */
+#ad {
+  margin-top: auto;
+  height: 300px;
+  width: 400px;
+  background-color: #454545;
+  border-radius: 4px;
+}
+
+#other {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  width: 210px;
+}
+
+#other>#infoParagraph {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 150%;
+  color: #8d8d8d;
+}
+
+#other>#sampleAdText {
+  margin: 1em 0 0.5em 0;
+  font-family: "Roboto Mono", monospace;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 13px;
+  line-height: 133.59%;
+  align-self: center;
+  color: #8d8d8d;
+}
+
+#other>p {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 150%;
+}

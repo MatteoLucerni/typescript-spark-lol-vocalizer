@@ -129,4 +129,4 @@ Using third-party software with **League of Legends** may violate the game's Ter
 
 ---
 
-*Stay updated with the latest versions and features by following the repository!*
+_Stay updated with the latest versions and features by following the repository!_
