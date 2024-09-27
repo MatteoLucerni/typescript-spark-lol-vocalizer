@@ -107,7 +107,9 @@
       "filter": "*.*"
     },
     "files": [
-      "assets/dragon.mp3"
+      "assets/dragon.mp3",
+      "assets/dragon-slain.mp3",
+      "assets/window-loaded.mp3"
     ]
   }
 }

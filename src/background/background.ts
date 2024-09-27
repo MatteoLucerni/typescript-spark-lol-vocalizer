@@ -7,7 +7,8 @@ import {
 } from '@overwolf/overwolf-api-ts';
 
 import { kWindowNames, kGameClassIds } from "../consts";
-import { speak } from './speech';
+import { playAudio } from './speech'; // Importa playAudio
+
 
 import RunningGameInfo = overwolf.games.RunningGameInfo;
 import AppLaunchTriggeredEvent = overwolf.extensions.AppLaunchTriggeredEvent;
@@ -59,7 +60,7 @@ public async run() {
   if (currWindowName === kWindowNames.inGame) {
     // Attendi che la finestra in-game sia pronta
     setTimeout(() => {
-      speak("L'applicazione è stata avviata.");
+      playAudio("window-loaded.mp3");
       console.log("Messaggio di avvio applicazione inviato.");
     }, 1000); // Ritardo di 1 secondo per assicurarsi che la finestra in-game sia pronta
   }
@@ -90,11 +91,9 @@ public async run() {
     if (info.isRunning) {
       this._windows[kWindowNames.desktop].close();
       this._windows[kWindowNames.inGame].restore();
-      this.handleGameStart();
     } else {
       this._windows[kWindowNames.desktop].restore();
       this._windows[kWindowNames.inGame].close();
-      this.handleGameEnd();
     }
   }
 
@@ -107,20 +106,6 @@ public async run() {
   // Identify whether the RunningGameInfo object references a supported game
   private isSupportedGame(info: RunningGameInfo) {
     return kGameClassIds.includes(info.classId);
-  }
-
-  // Handle game start events
-  private handleGameStart() {
-    speak("La partita è iniziata.");
-    console.log("Messaggio di avvio partita inviato.");
-    // Puoi aggiungere ulteriori avvisi o logica qui
-  }
-
-  // Handle game end events
-  private handleGameEnd() {
-    speak("La partita è terminata.");
-    console.log("Messaggio di fine partita inviato.");
-    // Puoi aggiungere ulteriori avvisi o logica qui
   }
 }
 
@@ -139,47 +124,28 @@ overwolf.games.events.onNewEvents.addListener((newEvents) => {
 });
 
 function handleGameEvent(event: overwolf.games.events.GameEvent) {
-  speak('Hello!');
+  console.log('Sus:', event);
   console.log('Evento ricevuto:', event);
 
   try {
     switch (event.name) {
-      case "kill":
-        const killData = JSON.parse(event.data);
-        const killMessage = `Hai effettuato un ${killData.label}.`;
-        console.log(killMessage);
-        speak(killMessage);
-        break;
-      case "death":
-        const deathMessage = "Il tuo campione è stato ucciso.";
-        console.log(deathMessage);
-        speak(deathMessage);
-        break;
-      case "respawn":
-        const respawnMessage = "Il tuo campione è rinato.";
-        console.log(respawnMessage);
-        speak(respawnMessage);
-        break;
+      // ... (altri casi)
       case "jungle_camps":
         const campData = JSON.parse(event.data);
         console.log('Dati del jungle_camps:', campData);
         if (campData.name === "Dragon") {
           if (campData.alive && !isDragonSpawned) {
-            const dragonSpawnMessage = "Il drake sta spawnando!";
-            console.log(dragonSpawnMessage);
-            speak(dragonSpawnMessage);
+            console.log("Il drake sta spawnando!");
+            playAudio('dragon.mp3');
             isDragonSpawned = true;
           } else if (!campData.alive && isDragonSpawned) {
-            const dragonDeathMessage = "Il drake è stato ucciso!";
-            console.log(dragonDeathMessage);
-            speak(dragonDeathMessage);
+            console.log("Il drake è stato ucciso!");
+            playAudio('dragon-slain.mp3'); // Usa un altro file audio se disponibile
             isDragonSpawned = false;
           }
         }
         break;
-      // Aggiungi altri casi per gestire altri eventi
-      default:
-        console.log(`Evento non gestito: ${event.name}`);
+      // ... (altri casi)
     }
   } catch (error) {
     console.error(`Errore nella gestione dell'evento ${event.name}:`, error);
