@@ -65,16 +65,29 @@ class BackgroundController {
 
   private setRequiredGameFeatures() {
     const requiredFeatures = [
-      'kill',
+      'gep_internal',
+      'live_client_data',
+      'matchState',
+      'match_info',
       'death',
       'respawn',
+      'abilities',
+      'kill',
+      'assist',
+      'gold',
+      'minions',
+      'summoner_info',
+      'gameMode',
+      'teams',
+      'level',
+      'announcer',
+      'counters',
+      'damage',
+      'heal',
       'jungle_camps',
-      'match_info',
-      'game_info',
-      'live_client_data',
-      // Aggiungi altre features se necessario
+      'team_frames',
+      'chat'
     ];
-
     overwolf.games.events.setRequiredFeatures(requiredFeatures, (info) => {
       if (info.success) {
         console.log('Features richieste impostate con successo:', requiredFeatures);
@@ -87,12 +100,27 @@ class BackgroundController {
   private registerGameEventsListener() {
     overwolf.games.events.onNewEvents.removeListener(this.onNewEvents);
     overwolf.games.events.onNewEvents.addListener(this.onNewEvents);
+
+    overwolf.games.events.onInfoUpdates2.removeListener(this.onInfoUpdates);
+    overwolf.games.events.onInfoUpdates2.addListener(this.onInfoUpdates);
   }
 
   private onNewEvents = (eventData: overwolf.games.events.NewGameEvents) => {
     console.log('Nuovi eventi di gioco ricevuti:', eventData);
     eventData.events.forEach(event => {
       this.handleGameEvent(event);
+    });
+  }
+
+  private onInfoUpdates = (infoData: overwolf.games.events.InfoUpdates2Event) => {
+    console.log('Nuovi info updates ricevuti:', infoData);
+    // Invia gli aggiornamenti delle informazioni alla finestra in-game
+    overwolf.windows.sendMessage("in_game", "info_update", infoData, (result) => {
+      if (result.success) {
+        console.log("Info update inviato alla finestra in-game con successo");
+      } else {
+        console.error("Errore nell'inviare l'info update alla finestra in-game:", result.error);
+      }
     });
   }
 
@@ -131,6 +159,15 @@ class BackgroundController {
     } catch (error) {
       console.error(`Errore nella gestione dell'evento ${event.name}:`, error);
     }
+
+     // Invia l'evento alla finestra in-game
+     overwolf.windows.sendMessage("in_game", "game_event", event, (result) => {
+      if (result.success) {
+        console.log("Evento inviato alla finestra in-game con successo");
+      } else {
+        console.error("Errore nell'inviare l'evento alla finestra in-game:", result.error);
+      }
+    });
   }
 
   private async onAppLaunchTriggered(e: AppLaunchTriggeredEvent) {

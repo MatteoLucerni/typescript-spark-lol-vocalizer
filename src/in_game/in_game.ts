@@ -14,8 +14,36 @@ overwolf.windows.onMessageReceived.addListener((event) => {
       console.log(`Messaggio ricevuto per riprodurre audio: ${audioMessage.filename}`);
       playAudio(audioMessage.filename);
     }
+  } else if (event.id === "game_event") {
+    const gameEvent = event.content as overwolf.games.events.GameEvent;
+    console.log(`Evento di gioco ricevuto: ${JSON.stringify(gameEvent)}`);
+    displayGameEvent(gameEvent);
+  } else if (event.id === "info_update") {
+    const infoUpdate = event.content as overwolf.games.events.InfoUpdates2Event;
+    console.log(`Info update ricevuto: ${JSON.stringify(infoUpdate)}`);
+    displayInfoUpdate(infoUpdate);
   }
 });
+
+// Funzione per visualizzare gli eventi di gioco
+function displayGameEvent(event: overwolf.games.events.GameEvent) {
+  const eventsLog = document.getElementById("eventsLog");
+  if (eventsLog) {
+    const eventElement = document.createElement("div");
+    eventElement.textContent = JSON.stringify(event);
+    eventsLog.appendChild(eventElement);
+  }
+}
+
+// Funzione per visualizzare gli aggiornamenti delle informazioni
+function displayInfoUpdate(infoUpdate: overwolf.games.events.InfoUpdates2Event) {
+  const infoLog = document.getElementById("infoLog");
+  if (infoLog) {
+    const infoElement = document.createElement("div");
+    infoElement.textContent = JSON.stringify(infoUpdate);
+    infoLog.appendChild(infoElement);
+  }
+}
 
 // Funzione per riprodurre un file audio specifico
 function playAudio(filename: string) {
