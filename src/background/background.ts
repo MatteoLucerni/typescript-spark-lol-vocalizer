@@ -13,6 +13,9 @@ import RunningGameInfo = overwolf.games.RunningGameInfo;
 import AppLaunchTriggeredEvent = overwolf.extensions.AppLaunchTriggeredEvent;
 
 interface ExtendedInfoUpdate2 extends overwolf.games.events.InfoUpdate2 {
+  jungle_camps?: {
+    [key: string]: any;
+  };
   live_client_data?: {
     events?: string;
     [key: string]: any;
@@ -133,6 +136,12 @@ class BackgroundController {
     console.log('Nuovi info updates ricevuti:', infoData);
 
     const info = infoData.info as ExtendedInfoUpdate2;
+
+    // Gestione degli aggiornamenti di jungle_camps
+    if (info?.jungle_camps) {
+      this.handleJungleCampsInfoUpdate(info.jungle_camps);
+    }
+
     if (info?.live_client_data?.events) {
       this.handleLiveClientData(info.live_client_data.events);
     }
@@ -145,6 +154,27 @@ class BackgroundController {
         console.error("Errore nell'inviare l'info update alla finestra in-game:", result.error);
       }
     });
+  }
+
+  private handleJungleCampsInfoUpdate(jungleCampsData: any) {
+    console.log('Aggiornamento jungle_camps:', jungleCampsData);
+    // Itera su tutti i campi della giungla aggiornati
+    for (const campKey in jungleCampsData) {
+      const campInfoString = jungleCampsData[campKey];
+      const campInfo = JSON.parse(campInfoString);
+
+      if (campInfo.name === "Dragon") {
+        if (campInfo.alive && !this.isDragonSpawned) {
+          console.log("Il Drago è spawnato!");
+          playAudio('dragon.mp3');
+          this.isDragonSpawned = true;
+        } else if (!campInfo.alive && this.isDragonSpawned) {
+          console.log("Il Drago è stato ucciso!");
+          this.isDragonSpawned = false;
+          // L'evento DragonKill gestisce l'aggiornamento del timer
+        }
+      }
+    }
   }
 
   private handleLiveClientData(eventsDataString: string) {
@@ -176,9 +206,6 @@ class BackgroundController {
         case "respawn":
           // Gestione dell'evento respawn
           break;
-        case "jungle_camps":
-          this.handleJungleCamps(event);
-          break;
         // Rimuoviamo la gestione dei messaggi di chat per il Drago
         default:
           console.log(`Evento non gestito: ${event.name}`);
@@ -195,22 +222,6 @@ class BackgroundController {
         console.error("Errore nell'inviare l'evento alla finestra in-game:", result.error);
       }
     });
-  }
-
-  private handleJungleCamps(event: overwolf.games.events.GameEvent) {
-    const campData = JSON.parse(event.data);
-    console.log('Dati del jungle_camps:', campData);
-    if (campData.name === "Dragon") {
-      if (campData.alive && !this.isDragonSpawned) {
-        console.log("Il Drago è spawnato!");
-        playAudio('dragon-spawn.mp3');
-        this.isDragonSpawned = true;
-      } else if (!campData.alive && this.isDragonSpawned) {
-        console.log("Il Drago è stato ucciso!");
-        this.isDragonSpawned = false;
-        // L'evento DragonKill gestisce l'aggiornamento del timer
-      }
-    }
   }
 
   private handleDragonKill(gameEvent: any) {
