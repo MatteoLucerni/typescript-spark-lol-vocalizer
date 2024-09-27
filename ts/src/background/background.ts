@@ -1,3 +1,5 @@
+// src/background.ts
+
 import {
   OWGames,
   OWGameListener,
@@ -5,16 +7,12 @@ import {
 } from '@overwolf/overwolf-api-ts';
 
 import { kWindowNames, kGameClassIds } from "../consts";
+import { speak } from './speech';
 
 import RunningGameInfo = overwolf.games.RunningGameInfo;
 import AppLaunchTriggeredEvent = overwolf.extensions.AppLaunchTriggeredEvent;
 
-// The background controller holds all of the app's background logic - hence its name. it has
-// many possible use cases, for example sharing data between windows, or, in our case,
-// managing which window is currently presented to the user. To that end, it holds a dictionary
-// of the windows available in the app.
-// Our background controller implements the Singleton design pattern, since only one
-// instance of it should exist.
+// BackgroundController class remains as defined
 class BackgroundController {
   private static _instance: BackgroundController;
   private _windows: Record<string, OWWindow> = {};
@@ -25,7 +23,7 @@ class BackgroundController {
     this._windows[kWindowNames.desktop] = new OWWindow(kWindowNames.desktop);
     this._windows[kWindowNames.inGame] = new OWWindow(kWindowNames.inGame);
 
-    // When a a supported game game is started or is ended, toggle the app's windows
+    // When a supported game is started or ended, toggle the app's windows
     this._gameListener = new OWGameListener({
       onGameStarted: this.toggleWindows.bind(this),
       onGameEnded: this.toggleWindows.bind(this)
@@ -45,8 +43,7 @@ class BackgroundController {
     return BackgroundController._instance;
   }
 
-  // When running the app, start listening to games' status and decide which window should
-  // be launched first, based on whether a supported game is currently running
+  // Start listening to game events
   public async run() {
     this._gameListener.start();
 
@@ -81,9 +78,11 @@ class BackgroundController {
     if (info.isRunning) {
       this._windows[kWindowNames.desktop].close();
       this._windows[kWindowNames.inGame].restore();
+      this.handleGameStart();
     } else {
       this._windows[kWindowNames.desktop].restore();
       this._windows[kWindowNames.inGame].close();
+      this.handleGameEnd();
     }
   }
 
@@ -93,10 +92,58 @@ class BackgroundController {
     return info && info.isRunning && this.isSupportedGame(info);
   }
 
-  // Identify whether the RunningGameInfo object we have references a supported game
+  // Identify whether the RunningGameInfo object references a supported game
   private isSupportedGame(info: RunningGameInfo) {
     return kGameClassIds.includes(info.classId);
+  }
+
+  // Handle game start events
+  private handleGameStart() {
+    speak("La partita è iniziata.");
+    // Puoi aggiungere ulteriori avvisi o logica qui
+  }
+
+  // Handle game end events
+  private handleGameEnd() {
+    speak("La partita è terminata.");
+    // Puoi aggiungere ulteriori avvisi o logica qui
   }
 }
 
 BackgroundController.instance().run();
+
+// Aggiungi la gestione degli eventi di gioco specifici
+
+overwolf.games.events.onNewEvents.addListener((newEvents) => {
+  // Accedi all'array 'events' all'interno di 'newEvents'
+  newEvents.events.forEach(event => {
+    handleGameEvent(event);
+  });
+});
+
+function handleGameEvent(event: overwolf.games.events.GameEvent) {
+
+  console.log('Evento ricevuto:', event.name);
+
+  switch (event.name) {
+    case "kill":
+      const killData = JSON.parse(event.data);
+      const killMessage = `Hai effettuato un ${killData.label}.`;
+      console.log(killMessage);
+      speak(killMessage);
+      break;
+    case "death":
+      const deathMessage = "Il tuo campione è stato ucciso.";
+      console.log(deathMessage);
+      speak(deathMessage);
+      break;
+    case "respawn":
+      const respawnMessage = "Il tuo campione è rinato.";
+      console.log(respawnMessage);
+      speak(respawnMessage);
+      break;
+    // Aggiungi altri casi per gestire altri eventi
+    default:
+      console.log(`Evento non gestito: ${event.name}`);
+  }
+}
