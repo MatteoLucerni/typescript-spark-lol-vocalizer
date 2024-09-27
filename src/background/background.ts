@@ -12,11 +12,24 @@ import { playAudio } from './speech';
 import RunningGameInfo = overwolf.games.RunningGameInfo;
 import AppLaunchTriggeredEvent = overwolf.extensions.AppLaunchTriggeredEvent;
 
+interface ExtendedInfoUpdate2 extends overwolf.games.events.InfoUpdate2 {
+  live_client_data?: {
+    events?: string;
+    [key: string]: any;
+  };
+}
+
 class BackgroundController {
   private static _instance: BackgroundController;
   private _windows: Record<string, OWWindow> = {};
   private _gameListener: OWGameListener;
   private isDragonSpawned = false;
+
+  // Variabili per il timer del Drago
+  private nextDragonSpawnTime: number = 300; // Il Drago spawna inizialmente a 5 minuti
+  private lastDragonKillTime: number | null = null;
+  private alertSentForNextDragon: boolean = false;
+  private lastMatchClockTime: number = 0;
 
   private constructor() {
     this._windows[kWindowNames.desktop] = new OWWindow(kWindowNames.desktop);
@@ -108,12 +121,22 @@ class BackgroundController {
   private onNewEvents = (eventData: overwolf.games.events.NewGameEvents) => {
     console.log('Nuovi eventi di gioco ricevuti:', eventData);
     eventData.events.forEach(event => {
+      if (event.name === 'match_clock') {
+        this.lastMatchClockTime = parseFloat(event.data);
+        this.checkDragonRespawnTimer(this.lastMatchClockTime);
+      }
       this.handleGameEvent(event);
     });
   }
 
   private onInfoUpdates = (infoData: overwolf.games.events.InfoUpdates2Event) => {
     console.log('Nuovi info updates ricevuti:', infoData);
+
+    const info = infoData.info as ExtendedInfoUpdate2;
+    if (info?.live_client_data?.events) {
+      this.handleLiveClientData(info.live_client_data.events);
+    }
+
     // Invia gli aggiornamenti delle informazioni alla finestra in-game
     overwolf.windows.sendMessage("in_game", "info_update", infoData, (result) => {
       if (result.success) {
@@ -122,6 +145,21 @@ class BackgroundController {
         console.error("Errore nell'inviare l'info update alla finestra in-game:", result.error);
       }
     });
+  }
+
+  private handleLiveClientData(eventsDataString: string) {
+    try {
+      const eventsData = JSON.parse(eventsDataString);
+      if (eventsData.Events) {
+        eventsData.Events.forEach((gameEvent: any) => {
+          if (gameEvent.EventName === "DragonKill") {
+            this.handleDragonKill(gameEvent);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Errore nel parsing di live_client_data events:', error);
+    }
   }
 
   private handleGameEvent(event: overwolf.games.events.GameEvent) {
@@ -139,20 +177,9 @@ class BackgroundController {
           // Gestione dell'evento respawn
           break;
         case "jungle_camps":
-          const campData = JSON.parse(event.data);
-          console.log('Dati del jungle_camps:', campData);
-          if (campData.name === "Dragon") {
-            if (campData.alive && !this.isDragonSpawned) {
-              console.log("Il drake sta spawnando!");
-              playAudio('dragon.mp3');
-              this.isDragonSpawned = true;
-            } else if (!campData.alive && this.isDragonSpawned) {
-              console.log("Il drake è stato ucciso!");
-              playAudio('dragon-slain.mp3');
-              this.isDragonSpawned = false;
-            }
-          }
+          this.handleJungleCamps(event);
           break;
+        // Rimuoviamo la gestione dei messaggi di chat per il Drago
         default:
           console.log(`Evento non gestito: ${event.name}`);
       }
@@ -160,14 +187,63 @@ class BackgroundController {
       console.error(`Errore nella gestione dell'evento ${event.name}:`, error);
     }
 
-     // Invia l'evento alla finestra in-game
-     overwolf.windows.sendMessage("in_game", "game_event", event, (result) => {
+    // Invia l'evento alla finestra in-game
+    overwolf.windows.sendMessage("in_game", "game_event", event, (result) => {
       if (result.success) {
         console.log("Evento inviato alla finestra in-game con successo");
       } else {
         console.error("Errore nell'inviare l'evento alla finestra in-game:", result.error);
       }
     });
+  }
+
+  private handleJungleCamps(event: overwolf.games.events.GameEvent) {
+    const campData = JSON.parse(event.data);
+    console.log('Dati del jungle_camps:', campData);
+    if (campData.name === "Dragon") {
+      if (campData.alive && !this.isDragonSpawned) {
+        console.log("Il Drago è spawnato!");
+        playAudio('dragon-spawn.mp3');
+        this.isDragonSpawned = true;
+      } else if (!campData.alive && this.isDragonSpawned) {
+        console.log("Il Drago è stato ucciso!");
+        this.isDragonSpawned = false;
+        // L'evento DragonKill gestisce l'aggiornamento del timer
+      }
+    }
+  }
+
+  private handleDragonKill(gameEvent: any) {
+    const currentGameTime = gameEvent.EventTime;
+    this.lastDragonKillTime = currentGameTime;
+    this.nextDragonSpawnTime = this.lastDragonKillTime + 300; // 5 minuti dopo l'uccisione
+    this.alertSentForNextDragon = false;
+    console.log(`Drago ucciso al minuto ${this.formatTime(this.lastDragonKillTime)}. Prossimo respawn al minuto ${this.formatTime(this.nextDragonSpawnTime)}.`);
+    playAudio('dragon-slain.mp3');
+  }
+
+  private checkDragonRespawnTimer(currentGameTime: number) {
+    const timeUntilNextDragonSpawn = this.nextDragonSpawnTime - currentGameTime;
+
+    if (timeUntilNextDragonSpawn <= 60 && timeUntilNextDragonSpawn > 0 && !this.alertSentForNextDragon) {
+      this.alertSentForNextDragon = true;
+      this.sendDragonSpawnAlert();
+    }
+
+    if (timeUntilNextDragonSpawn <= 0) {
+      this.alertSentForNextDragon = false;
+    }
+  }
+
+  private sendDragonSpawnAlert() {
+    console.log("Il Drago respawnerà tra un minuto!");
+    playAudio('one-min-drake.mp3');
+  }
+
+  private formatTime(timeInSeconds: number): string {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   }
 
   private async onAppLaunchTriggered(e: AppLaunchTriggeredEvent) {

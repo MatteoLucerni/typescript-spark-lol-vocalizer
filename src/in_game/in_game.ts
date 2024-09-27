@@ -16,11 +16,9 @@ overwolf.windows.onMessageReceived.addListener((event) => {
     }
   } else if (event.id === "game_event") {
     const gameEvent = event.content as overwolf.games.events.GameEvent;
-    console.log(`Evento di gioco ricevuto: ${JSON.stringify(gameEvent)}`);
     displayGameEvent(gameEvent);
   } else if (event.id === "info_update") {
     const infoUpdate = event.content as overwolf.games.events.InfoUpdates2Event;
-    console.log(`Info update ricevuto: ${JSON.stringify(infoUpdate)}`);
     displayInfoUpdate(infoUpdate);
   }
 });
