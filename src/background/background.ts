@@ -37,6 +37,8 @@ class BackgroundController {
   // Flag per evitare ripetizioni degli avvisi
   private blueSpawnAlertSent: boolean = false;
   private redSpawnAlertSent: boolean = false;
+  private scuttleBotSpawnAlert: boolean = false;
+  private scuttleTopSpawnAlert: boolean = false;
 
   private constructor() {
     this._windows[kWindowNames.desktop] = new OWWindow(kWindowNames.desktop);
@@ -206,6 +208,30 @@ class BackgroundController {
         } else if (iconStatus !== "2" && this.blueSpawnAlertSent) {
           // Reset del flag se lo stato cambia
           this.blueSpawnAlertSent = false;
+        }
+      }
+
+      // Gestione dello scuttle bot side
+      if (campName === "Scuttle Crab River Bot side") {
+        if (iconStatus === "2" && !this.scuttleBotSpawnAlert) {
+          console.log(`Il campo ${campName} sta per spawnare!`);
+          playAudio('scuttle-bot-spawn.mp3');
+          this.scuttleBotSpawnAlert = true;
+        } else if (iconStatus !== "2" && this.scuttleBotSpawnAlert) {
+          // Reset del flag se lo stato cambia
+          this.scuttleBotSpawnAlert = false;
+        }
+      }
+
+      // Gestione dello scuttle top side
+      if (campName === "Scuttle Crab River Top side") {
+        if (iconStatus === "2" && !this.scuttleTopSpawnAlert) {
+          console.log(`Il campo ${campName} sta per spawnare!`);
+          playAudio('scuttle-top-spawn.mp3');
+          this.scuttleTopSpawnAlert = true;
+        } else if (iconStatus !== "2" && this.scuttleTopSpawnAlert) {
+          // Reset del flag se lo stato cambia
+          this.scuttleTopSpawnAlert = false;
         }
       }
     }
