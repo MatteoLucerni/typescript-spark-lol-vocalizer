@@ -19,6 +19,9 @@ body {
   background-color: #2c2c2c;
   padding: 10px 20px;
   border-bottom: 2px solid #444;
+
+  /* Rende l'header trascinabile */
+  -webkit-app-region: drag;
 }
 
 .header-left {
@@ -46,6 +49,7 @@ body {
   display: flex;
 }
 
+/* Rendere i pulsanti di controllo non trascinabili */
 .window-control {
   width: 16px;
   height: 16px;
@@ -54,6 +58,9 @@ body {
   background-repeat: no-repeat;
   border: none;
   cursor: pointer;
+
+  /* Impedisce il trascinamento */
+  -webkit-app-region: no-drag;
 }
 
 .window-control-minimize {
@@ -67,6 +74,7 @@ body {
 .window-control-close {
   background-image: url('../../img/close.svg');
 }
+
 
 /* Main */
 main {
@@ -100,7 +108,7 @@ main {
 }
 
 /* Titoli delle Colonne */
-.logColumn h1 {
+.logColumn h2 {
   font-family: "Roboto Mono", monospace;
   font-style: normal;
   font-weight: normal;

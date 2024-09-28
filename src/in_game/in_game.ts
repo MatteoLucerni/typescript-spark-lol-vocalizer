@@ -73,4 +73,44 @@ function playAudio(filename: string) {
 
 window.onload = () => {
   console.log("Finestra in-game caricata correttamente.");
-};
+
+    // Gestione dei pulsanti di controllo finestra
+    const minimizeButton = document.getElementById("minimizeButton");
+    const maximizeButton = document.getElementById("maximizeButton");
+    const closeButton = document.getElementById("closeButton");
+  
+    if (minimizeButton) {
+      minimizeButton.addEventListener("click", () => {
+        overwolf.windows.getCurrentWindow((result) => {
+          if (result.success) {
+            overwolf.windows.minimize(result.window.id);
+          }
+        });
+      });
+    }
+  
+    if (maximizeButton) {
+      maximizeButton.addEventListener("click", () => {
+        overwolf.windows.getCurrentWindow((result) => {
+          if (result.success) {
+            if (result.window.state === "maximized") {
+              overwolf.windows.restore(result.window.id);
+            } else {
+              overwolf.windows.maximize(result.window.id);
+            }
+          }
+        });
+      });
+    }
+  
+    if (closeButton) {
+      closeButton.addEventListener("click", () => {
+        overwolf.windows.getCurrentWindow((result) => {
+          if (result.success) {
+            overwolf.windows.close(result.window.id);
+          }
+        });
+      });
+    }
+  };
+
