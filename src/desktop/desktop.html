@@ -7,56 +7,60 @@
   <link rel="stylesheet" href="../../css/header.css" />
   <link rel="stylesheet" href="../../css/desktop.css" />
   <link rel="stylesheet" href="../../css/modal.css" />
-  <title>Spark - Desktop page</title>
+  <title>Spark - Desktop Page</title>
 </head>
 
 <body class="desktop">
   <!-- -------------------------------- Header ------------------------------- -->
 
   <header id="header" class="app-header">
-    <img src="../../img/header_icon.svg" />
-    <h1>Sus Test</h1>
+    <img src="../../img/spark-icon.svg" alt="Spark Logo" class="header-logo" />
+    <h1>Spark LoL Voice Assistant</h1>
     <div class="window-controls-group">
-      <button id="minimizeButton" class="window-control window-control-minimize" />
-      <button id="maximizeButton" class="window-control window-control-maximize" />
-      <button id="closeButton" class="window-control window-control-close" />
+      <button id="minimizeButton" class="window-control window-control-minimize" title="Minimize"></button>
+      <button id="maximizeButton" class="window-control window-control-maximize" title="Maximize"></button>
+      <button id="closeButton" class="window-control window-control-close" title="Close"></button>
     </div>
   </header>
 
   <!-- --------------------------------- Main -------------------------------- -->
   <main>
     <div class="desktopTop">
-      <h1>Spark LOL Vocalizer</h1>
+      <h1>Spark LoL Voice Assistant</h1>
       <p>
-        Welcome to the Overwolf tutorial app for developers.<br />
-        Learn how to build an app by using one!
+        Potenzia la tua esperienza di gioco in League of Legends con Spark. Ricevi notifiche vocali in tempo reale per
+        eventi critici come spawn dei draghi, cattura degli obiettivi, distruzione delle torri e molto altro,
+        mantenendoti sempre informato senza distogliere l'attenzione dall'azione sullo schermo.
       </p>
-      <div id="version"></div>
+      <div id="version">Version 1.0.0</div>
     </div>
     <div class="desktopBottom">
       <!-- Launch a game! -->
       <div id="left">
-        <h1>
-          Launch a game and the In-Game window will pop-up automatically!
-        </h1>
+        <h2>Lancia un gioco</h2>
+        <p>
+          Avvia una partita e la finestra In-Game si aprirà automaticamente per monitorare gli eventi in tempo reale.
+        </p>
       </div>
-      <!-- Launch a game! -->
+      <!-- Features -->
       <div id="middle">
-        What can you learn with this sample app?
-        <br /><br />
-        1. How to listen to real-time game events and how to identify specific
-        events like match start/end, kill, and death.
-        <br /><br />
-        2. How to use a transparent background window as a service bus, that
-        acts as the main controller of your app.
-        <br /><br />
-        3. How to use Hotkeys that show/hide your app while you are in-game.
+        <h2>Caratteristiche di Spark</h2>
+        <ul>
+          <li><strong>Avvisi Vocali in Tempo Reale:</strong> Ricevi notifiche audio istantanee per eventi chiave del
+            gioco.</li>
+          <li><strong>Monitoraggio Completo degli Eventi:</strong> Traccia una vasta gamma di eventi, inclusi spawn dei
+            draghi, uccisioni del Baron Nashor, distruzione delle torri e morti dei giocatori.</li>
+          <li><strong>Notifiche Personalizzabili:</strong> Scegli quali eventi monitorare e personalizza i messaggi
+            vocali secondo le tue preferenze.</li>
+          <li><strong>Interfaccia Intuitiva:</strong> Configura facilmente le impostazioni e gestisci le notifiche
+            tramite un'interfaccia utente user-friendly.</li>
+        </ul>
       </div>
-      <!-- picture -->
+      <!-- Image -->
       <div id="right">
         <div style="text-align: center">
           <div style="display: inline-block">
-            <img src="../../img/cool_wolf.png" />
+            <img src="../../img/spark-logo.png" alt="Spark Logo" />
           </div>
         </div>
       </div>
@@ -66,11 +70,15 @@
   <script>
     // Standard Google Universal Analytics code
     (function (i, s, o, g, r, a, m) {
-      i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+      i['GoogleAnalyticsObject'] = r;
+      i[r] = i[r] || function () {
         (i[r].q = i[r].q || []).push(arguments)
-      },
-        i[r].l = 1 * new Date(); a = s.createElement(o),
-          m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+      }, i[r].l = 1 * new Date();
+      a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0];
+      a.async = 1;
+      a.src = g;
+      m.parentNode.insertBefore(a, m)
       // Note: https protocol here
     })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
