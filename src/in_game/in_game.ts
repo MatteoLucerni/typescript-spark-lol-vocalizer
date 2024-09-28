@@ -1,5 +1,16 @@
 // src/in_game/in_game.ts
 
+interface ExtendedInfoUpdate2 extends overwolf.games.events.InfoUpdate2 {
+  jungle_camps?: {
+    [key: string]: any;
+  };
+}
+
+// Type guard per ExtendedInfoUpdate2
+function isExtendedInfoUpdate(infoUpdate: overwolf.games.events.InfoUpdate2): infoUpdate is ExtendedInfoUpdate2 {
+  return (infoUpdate as ExtendedInfoUpdate2).jungle_camps !== undefined;
+}
+
 // Ascolta i messaggi dalla background page
 overwolf.windows.onMessageReceived.addListener((event) => {
   if (event.id === "speak") {
@@ -19,7 +30,14 @@ overwolf.windows.onMessageReceived.addListener((event) => {
     displayGameEvent(gameEvent);
   } else if (event.id === "info_update") {
     const infoUpdate = event.content as overwolf.games.events.InfoUpdates2Event;
-    displayInfoUpdate(infoUpdate);
+
+    // Controlla se l'infoUpdate contiene dati su jungle_camps usando il type guard
+    if (isExtendedInfoUpdate(infoUpdate.info) && infoUpdate.info.jungle_camps) {
+      displayInfoUpdate(infoUpdate.info);
+    } else {
+      // Opzionale: Logga o ignora gli altri eventi info_update
+      console.log('info_update ricevuto, ma non contiene dati su jungle_camps. Ignorato.');
+    }
   }
 });
 
@@ -34,7 +52,7 @@ function displayGameEvent(event: overwolf.games.events.GameEvent) {
 }
 
 // Funzione per visualizzare gli aggiornamenti delle informazioni
-function displayInfoUpdate(infoUpdate: overwolf.games.events.InfoUpdates2Event) {
+function displayInfoUpdate(infoUpdate: ExtendedInfoUpdate2) {
   const infoLog = document.getElementById("infoLog");
   if (infoLog) {
     const infoElement = document.createElement("div");

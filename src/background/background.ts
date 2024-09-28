@@ -34,6 +34,10 @@ class BackgroundController {
   private alertSentForNextDragon: boolean = false;
   private lastMatchClockTime: number = 0;
 
+  // Flag per evitare ripetizioni degli avvisi
+  private blueSpawnAlertSent: boolean = false;
+  private redSpawnAlertSent: boolean = false;
+
   private constructor() {
     this._windows[kWindowNames.desktop] = new OWWindow(kWindowNames.desktop);
     this._windows[kWindowNames.inGame] = new OWWindow(kWindowNames.inGame);
@@ -146,14 +150,16 @@ class BackgroundController {
       this.handleLiveClientData(info.live_client_data.events);
     }
 
-    // Invia gli aggiornamenti delle informazioni alla finestra in-game
-    overwolf.windows.sendMessage("in_game", "info_update", infoData, (result) => {
-      if (result.success) {
-        console.log("Info update inviato alla finestra in-game con successo");
-      } else {
-        console.error("Errore nell'inviare l'info update alla finestra in-game:", result.error);
-      }
-    });
+    // Invia gli aggiornamenti delle informazioni alla finestra in-game solo se contiene jungle_camps
+    if (info?.jungle_camps) {
+      overwolf.windows.sendMessage("in_game", "info_update", infoData, (result) => {
+        if (result.success) {
+          console.log("Info update di jungle_camps inviato alla finestra in-game con successo");
+        } else {
+          console.error("Errore nell'inviare l'info update di jungle_camps alla finestra in-game:", result.error);
+        }
+      });
+    }
   }
 
   private handleJungleCampsInfoUpdate(jungleCampsData: any) {
@@ -163,7 +169,11 @@ class BackgroundController {
       const campInfoString = jungleCampsData[campKey];
       const campInfo = JSON.parse(campInfoString);
 
-      if (campInfo.name === "Dragon") {
+      const campName = campInfo.name;
+      const iconStatus = campInfo.icon_status;
+
+      // Gestione specifica per il Drago
+      if (campName === "Dragon") {
         if (campInfo.alive && !this.isDragonSpawned) {
           console.log("Il Drago è spawnato!");
           playAudio('dragon.mp3');
@@ -172,6 +182,30 @@ class BackgroundController {
           console.log("Il Drago è stato ucciso!");
           this.isDragonSpawned = false;
           // L'evento DragonKill gestisce l'aggiornamento del timer
+        }
+      }
+
+      // Gestione per campi che iniziano con "Red"
+      if (campName.startsWith("Red")) {
+        if (iconStatus === "2" && !this.redSpawnAlertSent) {
+          console.log(`Il campo ${campName} sta per spawnare!`);
+          playAudio('red-spawn.mp3');
+          this.redSpawnAlertSent = true;
+        } else if (iconStatus !== "2" && this.redSpawnAlertSent) {
+          // Reset del flag se lo stato cambia
+          this.redSpawnAlertSent = false;
+        }
+      }
+
+      // Gestione per campi che iniziano con "Blue"
+      if (campName.startsWith("Blue")) {
+        if (iconStatus === "2" && !this.blueSpawnAlertSent) {
+          console.log(`Il campo ${campName} sta per spawnare!`);
+          playAudio('blue-spawn.mp3');
+          this.blueSpawnAlertSent = true;
+        } else if (iconStatus !== "2" && this.blueSpawnAlertSent) {
+          // Reset del flag se lo stato cambia
+          this.blueSpawnAlertSent = false;
         }
       }
     }

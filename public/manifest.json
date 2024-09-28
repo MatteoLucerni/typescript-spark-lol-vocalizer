@@ -108,6 +108,8 @@
     },
     "files": [
       "assets/dragon.mp3",
+      "assets/blue-spawn.mp3 ",
+      "assets/red-spwan.mp3",
       "assets/one-min-drake.mp3",
       "assets/dragon-slain.mp3",
       "assets/window-loaded.mp3"

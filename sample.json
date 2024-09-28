@@ -1,0 +1,8 @@
+{
+    "info": {
+        "jungle_camps": {
+            "jungle_camp_2": "{\"name\":\"Red West\",\"alive\":false,\"vision\":true,\"icon_status\":\"2\"}"
+        }
+    },
+    "feature": "jungle_camps"
+}
