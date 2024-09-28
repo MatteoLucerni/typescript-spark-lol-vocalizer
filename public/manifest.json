@@ -3,10 +3,10 @@
   "type": "WebApp",
   "meta": {
     "name": "Spark",
-    "author": "Il Tuo Nome",
+    "author": "Matteo Lucerni",
     "version": "1.0.0",
     "minimum-overwolf-version": "0.160.0",
-    "description": "Avvisi vocali personalizzabili per League of Legends.",
+    "description": "Customizable voice alerts for League of Legends",
     "dock_button_title": "Spark",
     "icon": "icons/IconMouseOver.png",
     "icon_gray": "icons/IconMouseNormal.png",
