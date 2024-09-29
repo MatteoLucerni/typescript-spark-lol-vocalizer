@@ -1,5 +1,6 @@
 // src/in_game/in_game.ts
 
+// Interfaccia estesa per includere jungle_camps
 interface ExtendedInfoUpdate2 extends overwolf.games.events.InfoUpdate2 {
   jungle_camps?: {
     [key: string]: any;
@@ -9,6 +10,49 @@ interface ExtendedInfoUpdate2 extends overwolf.games.events.InfoUpdate2 {
 // Type guard per ExtendedInfoUpdate2
 function isExtendedInfoUpdate(infoUpdate: overwolf.games.events.InfoUpdate2): infoUpdate is ExtendedInfoUpdate2 {
   return (infoUpdate as ExtendedInfoUpdate2).jungle_camps !== undefined;
+}
+
+// Coda per gli audio
+let audioQueue: string[] = [];
+let isPlaying: boolean = false;
+
+// Funzione per aggiungere un audio alla coda
+function enqueueAudio(filename: string) {
+  audioQueue.push(filename);
+  if (!isPlaying) {
+    playNextAudio();
+  }
+}
+
+// Funzione per riprodurre il prossimo audio nella coda
+function playNextAudio() {
+  if (audioQueue.length === 0) {
+    isPlaying = false;
+    return;
+  }
+
+  isPlaying = true;
+  const filename = audioQueue.shift();
+  const audio = new Audio(`assets/${filename}`);
+
+  audio.play().then(() => {
+    console.log(`Audio ${filename} riprodotto con successo`);
+  }).catch((error) => {
+    console.error(`Errore nella riproduzione dell'audio ${filename}:`, error);
+    isPlaying = false;
+    playNextAudio();
+  });
+
+  audio.onended = () => {
+    isPlaying = false;
+    playNextAudio();
+  };
+
+  audio.onerror = (error) => {
+    console.error(`Errore nella riproduzione dell'audio ${filename}:`, error);
+    isPlaying = false;
+    playNextAudio();
+  };
 }
 
 // Ascolta i messaggi dalla background page
@@ -23,7 +67,7 @@ overwolf.windows.onMessageReceived.addListener((event) => {
     const audioMessage = event.content as { filename: string };
     if (audioMessage && audioMessage.filename) {
       console.log(`Messaggio ricevuto per riprodurre audio: ${audioMessage.filename}`);
-      playAudio(audioMessage.filename);
+      enqueueAudio(audioMessage.filename);
     }
   } else if (event.id === "game_event") {
     const gameEvent = event.content as overwolf.games.events.GameEvent;
@@ -61,56 +105,45 @@ function displayInfoUpdate(infoUpdate: ExtendedInfoUpdate2) {
   }
 }
 
-// Funzione per riprodurre un file audio specifico
-function playAudio(filename: string) {
-  const audio = new Audio(`assets/${filename}`);
-  audio.play().then(() => {
-    console.log(`Audio ${filename} riprodotto con successo`);
-  }).catch((error) => {
-    console.error(`Errore nella riproduzione dell'audio ${filename}:`, error);
-  });
-}
-
 window.onload = () => {
   console.log("Finestra in-game caricata correttamente.");
 
-    // Gestione dei pulsanti di controllo finestra
-    const minimizeButton = document.getElementById("minimizeButton");
-    const maximizeButton = document.getElementById("maximizeButton");
-    const closeButton = document.getElementById("closeButton");
-  
-    if (minimizeButton) {
-      minimizeButton.addEventListener("click", () => {
-        overwolf.windows.getCurrentWindow((result) => {
-          if (result.success) {
-            overwolf.windows.minimize(result.window.id);
-          }
-        });
-      });
-    }
-  
-    if (maximizeButton) {
-      maximizeButton.addEventListener("click", () => {
-        overwolf.windows.getCurrentWindow((result) => {
-          if (result.success) {
-            if (result.window.state === "maximized") {
-              overwolf.windows.restore(result.window.id);
-            } else {
-              overwolf.windows.maximize(result.window.id);
-            }
-          }
-        });
-      });
-    }
-  
-    if (closeButton) {
-      closeButton.addEventListener("click", () => {
-        overwolf.windows.getCurrentWindow((result) => {
-          if (result.success) {
-            overwolf.windows.close(result.window.id);
-          }
-        });
-      });
-    }
-  };
+  // Gestione dei pulsanti di controllo finestra
+  const minimizeButton = document.getElementById("minimizeButton");
+  const maximizeButton = document.getElementById("maximizeButton");
+  const closeButton = document.getElementById("closeButton");
 
+  if (minimizeButton) {
+    minimizeButton.addEventListener("click", () => {
+      overwolf.windows.getCurrentWindow((result) => {
+        if (result.success) {
+          overwolf.windows.minimize(result.window.id);
+        }
+      });
+    });
+  }
+
+  if (maximizeButton) {
+    maximizeButton.addEventListener("click", () => {
+      overwolf.windows.getCurrentWindow((result) => {
+        if (result.success) {
+          if (result.window.state === "maximized") {
+            overwolf.windows.restore(result.window.id);
+          } else {
+            overwolf.windows.maximize(result.window.id);
+          }
+        }
+      });
+    });
+  }
+
+  if (closeButton) {
+    closeButton.addEventListener("click", () => {
+      overwolf.windows.getCurrentWindow((result) => {
+        if (result.success) {
+          overwolf.windows.close(result.window.id);
+        }
+      });
+    });
+  }
+};
