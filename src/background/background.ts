@@ -290,7 +290,6 @@ class BackgroundController {
     this.nextDragonSpawnTime = this.lastDragonKillTime + 300; // 5 minuti dopo l'uccisione
     this.alertSentForNextDragon = false;
     console.log(`Drago ucciso al minuto ${this.formatTime(this.lastDragonKillTime)}. Prossimo respawn al minuto ${this.formatTime(this.nextDragonSpawnTime)}.`);
-    playAudio('dragon-slain.mp3');
   }
 
   private checkDragonRespawnTimer(currentGameTime: number) {
