@@ -64,15 +64,15 @@ body {
 }
 
 .window-control-minimize {
-  background-image: url('../../img/minimize.svg');
+  background-image: url('../../img/window_minimize.svg');
 }
 
 .window-control-maximize {
-  background-image: url('../../img/maximize.svg');
+  background-image: url('../../img/window_maximize.svg');
 }
 
 .window-control-close {
-  background-image: url('../../img/close.svg');
+  background-image: url('../../img/window_close.svg');
 }
 
 
