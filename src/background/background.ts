@@ -17,7 +17,7 @@ interface ExtendedInfoUpdate2 extends overwolf.games.events.InfoUpdate2 {
     [key: string]: any;
   };
   live_client_data?: {
-    events?: string;
+    events?: any[]; // Modifica il tipo per riflettere che è un array
     [key: string]: any;
   };
 }
@@ -71,8 +71,37 @@ class BackgroundController {
 
     this._windows[currWindowName].restore();
 
-    // Imposta le features richieste per gli eventi di gioco
-    this.setRequiredGameFeatures();
+    // Imposta le features richieste per gli eventi di gioco con ritentativi
+    try {
+      await this.setRequiredFeaturesWithRetry([
+        'gep_internal',
+        'live_client_data',
+        'matchState',
+        'match_info',
+        'death',
+        'respawn',
+        'abilities',
+        'kill',
+        'assist',
+        'gold',
+        'minions',
+        'summoner_info',
+        'gameMode',
+        'teams',
+        'level',
+        'announcer',
+        'counters',
+        'damage',
+        'heal',
+        'jungle_camps',
+        'team_frames',
+        'chat'
+      ]);
+    } catch (error) {
+      console.error('Non è stato possibile impostare le features richieste. L\'app potrebbe non funzionare correttamente.');
+      // Puoi decidere se terminare l'app o continuare comunque
+      return;
+    }
 
     // Registra il listener per gli eventi di gioco
     this.registerGameEventsListener();
@@ -85,38 +114,52 @@ class BackgroundController {
     }
   }
 
-  private setRequiredGameFeatures() {
-    const requiredFeatures = [
-      'gep_internal',
-      'live_client_data',
-      'matchState',
-      'match_info',
-      'death',
-      'respawn',
-      'abilities',
-      'kill',
-      'assist',
-      'gold',
-      'minions',
-      'summoner_info',
-      'gameMode',
-      'teams',
-      'level',
-      'announcer',
-      'counters',
-      'damage',
-      'heal',
-      'jungle_camps',
-      'team_frames',
-      'chat'
-    ];
-    overwolf.games.events.setRequiredFeatures(requiredFeatures, (info) => {
-      if (info.success) {
+  /**
+   * Ritenta di impostare le features richieste con un numero massimo di tentativi e un intervallo di ritentativo.
+   * @param requiredFeatures Le features richieste da impostare.
+   * @param maxRetries Il numero massimo di tentativi.
+   * @param delayMs L'intervallo di tempo tra i tentativi in millisecondi.
+   */
+  private async setRequiredFeaturesWithRetry(requiredFeatures: string[], maxRetries: number = 100, delayMs: number = 3000): Promise<void> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        await this.setRequiredFeatures(requiredFeatures);
         console.log('Features richieste impostate con successo:', requiredFeatures);
-      } else {
-        console.error('Errore nell\'impostare le features richieste:', info.error);
+        return; // Esce dalla funzione se ha successo
+      } catch (error) {
+        console.error(`Tentativo ${attempt}: Errore nell'impostare le features richieste:`, error);
+        if (attempt === maxRetries) {
+          console.error('Numero massimo di tentativi raggiunto. Le features non sono state impostate correttamente.');
+          throw error; // Rilancia l'errore dopo il massimo dei tentativi
+        }
+        // Attende prima del prossimo tentativo
+        await this.delay(delayMs);
       }
+    }
+  }
+
+  /**
+   * Imposta le features richieste e ritorna una Promise che risolve se ha successo e rifiuta se fallisce.
+   * @param requiredFeatures Le features richieste da impostare.
+   */
+  private setRequiredFeatures(requiredFeatures: string[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+      overwolf.games.events.setRequiredFeatures(requiredFeatures, (info) => {
+        if (info.success) {
+          resolve();
+        } else {
+          reject(info.error);
+        }
+      });
     });
+  }
+
+  /**
+   * Funzione di utilità per creare un delay.
+   * @param ms Il numero di millisecondi da attendere.
+   */
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   private registerGameEventsListener() {
@@ -148,7 +191,9 @@ class BackgroundController {
       this.handleJungleCampsInfoUpdate(info.jungle_camps);
     }
 
+    // Gestione live_client_data.events
     if (info?.live_client_data?.events) {
+      console.log('live_client_data.events:', info.live_client_data.events);
       this.handleLiveClientData(info.live_client_data.events);
     }
 
@@ -237,18 +282,18 @@ class BackgroundController {
     }
   }
 
-  private handleLiveClientData(eventsDataString: string) {
+  private handleLiveClientData(eventsData: any[]) {
     try {
-      const eventsData = JSON.parse(eventsDataString);
-      if (eventsData.Events) {
-        eventsData.Events.forEach((gameEvent: any) => {
+      if (eventsData) {
+        eventsData.forEach((gameEvent: any) => {
+          console.log('Evento ricevuto da live_client_data:', gameEvent);
           if (gameEvent.EventName === "DragonKill") {
             this.handleDragonKill(gameEvent);
           }
         });
       }
     } catch (error) {
-      console.error('Errore nel parsing di live_client_data events:', error);
+      console.error('Errore nella gestione di live_client_data events:', error);
     }
   }
 
@@ -290,6 +335,7 @@ class BackgroundController {
     this.nextDragonSpawnTime = this.lastDragonKillTime + 300; // 5 minuti dopo l'uccisione
     this.alertSentForNextDragon = false;
     console.log(`Drago ucciso al minuto ${this.formatTime(this.lastDragonKillTime)}. Prossimo respawn al minuto ${this.formatTime(this.nextDragonSpawnTime)}.`);
+    playAudio('dragon-slain.mp3');
   }
 
   private checkDragonRespawnTimer(currentGameTime: number) {
@@ -355,6 +401,13 @@ class BackgroundController {
   private isSupportedGame(info: RunningGameInfo) {
     return kGameClassIds.includes(info.classId);
   }
+
+  /**
+   * Ritenta di impostare le features richieste con un numero massimo di tentativi e un intervallo di ritentativo.
+   * @param requiredFeatures Le features richieste da impostare.
+   * @param maxRetries Il numero massimo di tentativi.
+   * @param delayMs L'intervallo di tempo tra i tentativi in millisecondi.
+   */
 }
 
 BackgroundController.instance().run();
