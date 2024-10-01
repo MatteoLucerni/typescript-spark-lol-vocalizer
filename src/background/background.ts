@@ -7,7 +7,7 @@ import {
 } from '@overwolf/overwolf-api-ts';
 
 import { kWindowNames, kGameClassIds } from "../consts";
-import { playAudio } from './speech';
+import { playAudio } from './speech'; // Importa playAudio da speech.ts
 
 import RunningGameInfo = overwolf.games.RunningGameInfo;
 import AppLaunchTriggeredEvent = overwolf.extensions.AppLaunchTriggeredEvent;
@@ -40,6 +40,14 @@ class BackgroundController {
   private scuttleBotSpawnAlert: boolean = false;
   private scuttleTopSpawnAlert: boolean = false;
 
+  // Stato degli alert (di default tutti abilitati)
+  private alertsEnabled = {
+    redBuff: true,
+    blueBuff: true,
+    scuttleBot: true,
+    scuttleTop: true,
+  };
+
   private constructor() {
     this._windows[kWindowNames.desktop] = new OWWindow(kWindowNames.desktop);
     this._windows[kWindowNames.inGame] = new OWWindow(kWindowNames.inGame);
@@ -52,6 +60,9 @@ class BackgroundController {
     overwolf.extensions.onAppLaunchTriggered.addListener(
       e => this.onAppLaunchTriggered(e)
     );
+
+    // Aggiungi il listener per i messaggi dalla finestra in-game
+    overwolf.windows.onMessageReceived.addListener(this.onMessageReceived.bind(this));
   };
 
   public static instance(): BackgroundController {
@@ -236,7 +247,9 @@ class BackgroundController {
       if (campName.startsWith("Red")) {
         if (iconStatus === "2" && !this.redSpawnAlertSent) {
           console.log(`Il campo ${campName} sta per spawnare!`);
-          playAudio('red-spawn.mp3');
+          if (this.alertsEnabled.redBuff) {
+            playAudio('red-spawn.mp3');
+          }
           this.redSpawnAlertSent = true;
         } else if (iconStatus !== "2" && this.redSpawnAlertSent) {
           // Reset del flag se lo stato cambia
@@ -248,7 +261,9 @@ class BackgroundController {
       if (campName.startsWith("Blue")) {
         if (iconStatus === "2" && !this.blueSpawnAlertSent) {
           console.log(`Il campo ${campName} sta per spawnare!`);
-          playAudio('blue-spawn.mp3');
+          if (this.alertsEnabled.blueBuff) {
+            playAudio('blue-spawn.mp3');
+          }
           this.blueSpawnAlertSent = true;
         } else if (iconStatus !== "2" && this.blueSpawnAlertSent) {
           // Reset del flag se lo stato cambia
@@ -260,7 +275,9 @@ class BackgroundController {
       if (campName === "Scuttle Crab River Bot side") {
         if (iconStatus === "2" && !this.scuttleBotSpawnAlert) {
           console.log(`Il campo ${campName} sta per spawnare!`);
-          playAudio('scuttle-bot-spawn.mp3');
+          if (this.alertsEnabled.scuttleBot) {
+            playAudio('scuttle-bot-spawn.mp3');
+          }
           this.scuttleBotSpawnAlert = true;
         } else if (iconStatus !== "2" && this.scuttleBotSpawnAlert) {
           // Reset del flag se lo stato cambia
@@ -272,7 +289,9 @@ class BackgroundController {
       if (campName === "Scuttle Crab River Top side") {
         if (iconStatus === "2" && !this.scuttleTopSpawnAlert) {
           console.log(`Il campo ${campName} sta per spawnare!`);
-          playAudio('scuttle-top-spawn.mp3');
+          if (this.alertsEnabled.scuttleTop) {
+            playAudio('scuttle-top-spawn.mp3');
+          }
           this.scuttleTopSpawnAlert = true;
         } else if (iconStatus !== "2" && this.scuttleTopSpawnAlert) {
           // Reset del flag se lo stato cambia
@@ -402,12 +421,24 @@ class BackgroundController {
     return kGameClassIds.includes(info.classId);
   }
 
-  /**
-   * Ritenta di impostare le features richieste con un numero massimo di tentativi e un intervallo di ritentativo.
-   * @param requiredFeatures Le features richieste da impostare.
-   * @param maxRetries Il numero massimo di tentativi.
-   * @param delayMs L'intervallo di tempo tra i tentativi in millisecondi.
-   */
+  // Listener per i messaggi ricevuti dalla finestra in-game
+  private onMessageReceived(message: overwolf.windows.MessageReceivedEvent) {
+    if (message.id === "toggle_red_buff") {
+      this.alertsEnabled.redBuff = message.content.enabled;
+      console.log(`Red Buff alert enabled: ${this.alertsEnabled.redBuff}`);
+    } else if (message.id === "toggle_blue_buff") {
+      this.alertsEnabled.blueBuff = message.content.enabled;
+      console.log(`Blue Buff alert enabled: ${this.alertsEnabled.blueBuff}`);
+    } else if (message.id === "toggle_scuttle_bot") {
+      this.alertsEnabled.scuttleBot = message.content.enabled;
+      console.log(`Scuttle Bot alert enabled: ${this.alertsEnabled.scuttleBot}`);
+    } else if (message.id === "toggle_scuttle_top") {
+      this.alertsEnabled.scuttleTop = message.content.enabled;
+      console.log(`Scuttle Top alert enabled: ${this.alertsEnabled.scuttleTop}`);
+    } else {
+      console.log(`Messaggio non gestito: ${message.id}`);
+    }
+  }
 }
 
 BackgroundController.instance().run();

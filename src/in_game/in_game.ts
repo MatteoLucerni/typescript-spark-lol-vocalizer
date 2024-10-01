@@ -1,18 +1,6 @@
 // src/in_game/in_game.ts
 
-// Interfaccia estesa per includere jungle_camps
-interface ExtendedInfoUpdate2 extends overwolf.games.events.InfoUpdate2 {
-  jungle_camps?: {
-    [key: string]: any;
-  };
-}
-
-// Type guard per ExtendedInfoUpdate2
-function isExtendedInfoUpdate(infoUpdate: overwolf.games.events.InfoUpdate2): infoUpdate is ExtendedInfoUpdate2 {
-  return (infoUpdate as ExtendedInfoUpdate2).jungle_camps !== undefined;
-}
-
-// Coda per gli audio
+// Gestione della coda audio
 let audioQueue: string[] = [];
 let isPlaying: boolean = false;
 
@@ -55,15 +43,9 @@ function playNextAudio() {
   };
 }
 
-// Ascolta i messaggi dalla background page
+// Ascolta i messaggi dal background script
 overwolf.windows.onMessageReceived.addListener((event) => {
-  if (event.id === "speak") {
-    const speakMessage = event.content as { message: string };
-    if (speakMessage && speakMessage.message) {
-      console.log(`Messaggio ricevuto per speak: ${speakMessage.message}`);
-      // Implementa la sintesi vocale se necessario
-    }
-  } else if (event.id === "play_audio") {
+  if (event.id === "play_audio") {
     const audioMessage = event.content as { filename: string };
     if (audioMessage && audioMessage.filename) {
       console.log(`Messaggio ricevuto per riprodurre audio: ${audioMessage.filename}`);
@@ -74,14 +56,9 @@ overwolf.windows.onMessageReceived.addListener((event) => {
     displayGameEvent(gameEvent);
   } else if (event.id === "info_update") {
     const infoUpdate = event.content as overwolf.games.events.InfoUpdates2Event;
-
-    // Controlla se l'infoUpdate contiene dati su jungle_camps usando il type guard
-    if (isExtendedInfoUpdate(infoUpdate.info) && infoUpdate.info.jungle_camps) {
-      displayInfoUpdate(infoUpdate.info);
-    } else {
-      // Opzionale: Logga o ignora gli altri eventi info_update
-      console.log('info_update ricevuto, ma non contiene dati su jungle_camps. Ignorato.');
-    }
+    displayInfoUpdate(infoUpdate);
+  } else {
+    console.log(`Messaggio non gestito: ${event.id}`);
   }
 });
 
@@ -96,7 +73,7 @@ function displayGameEvent(event: overwolf.games.events.GameEvent) {
 }
 
 // Funzione per visualizzare gli aggiornamenti delle informazioni
-function displayInfoUpdate(infoUpdate: ExtendedInfoUpdate2) {
+function displayInfoUpdate(infoUpdate: overwolf.games.events.InfoUpdates2Event) {
   const infoLog = document.getElementById("infoLog");
   if (infoLog) {
     const infoElement = document.createElement("div");
@@ -108,7 +85,7 @@ function displayInfoUpdate(infoUpdate: ExtendedInfoUpdate2) {
 window.onload = () => {
   console.log("Finestra in-game caricata correttamente.");
 
-  // Gestione dei pulsanti di controllo finestra
+  // Pulsanti di controllo finestra
   const minimizeButton = document.getElementById("minimizeButton");
   const maximizeButton = document.getElementById("maximizeButton");
   const closeButton = document.getElementById("closeButton");
@@ -146,4 +123,43 @@ window.onload = () => {
       });
     });
   }
+
+  // Gestione degli switch di alert
+  const toggleRedBuff = document.getElementById("toggleRedBuff") as HTMLInputElement;
+  const toggleBlueBuff = document.getElementById("toggleBlueBuff") as HTMLInputElement;
+  const toggleScuttleBot = document.getElementById("toggleScuttleBot") as HTMLInputElement;
+  const toggleScuttleTop = document.getElementById("toggleScuttleTop") as HTMLInputElement;
+
+  // Funzione per inviare il messaggio al background script
+  function sendToggleMessage(id: string, enabled: boolean) {
+    overwolf.windows.sendMessage(
+      "background", // Nome della finestra di destinazione
+      id,           // messageId
+      { enabled: enabled }, // messageContent
+      (result) => {         // callback
+        if (result.success) {
+          console.log(`Messaggio ${id} inviato con successo`);
+        } else {
+          console.error(`Errore nell'invio del messaggio ${id}:`, result.error);
+        }
+      }
+    );
+  }
+
+  // Aggiungi event listener per ogni switch
+  toggleRedBuff.addEventListener("change", () => {
+    sendToggleMessage("toggle_red_buff", toggleRedBuff.checked);
+  });
+
+  toggleBlueBuff.addEventListener("change", () => {
+    sendToggleMessage("toggle_blue_buff", toggleBlueBuff.checked);
+  });
+
+  toggleScuttleBot.addEventListener("change", () => {
+    sendToggleMessage("toggle_scuttle_bot", toggleScuttleBot.checked);
+  });
+
+  toggleScuttleTop.addEventListener("change", () => {
+    sendToggleMessage("toggle_scuttle_top", toggleScuttleTop.checked);
+  });
 };
