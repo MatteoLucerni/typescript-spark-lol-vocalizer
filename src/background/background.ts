@@ -18,8 +18,20 @@ interface ExtendedInfoUpdate2 extends overwolf.games.events.InfoUpdate2 {
   };
   live_client_data?: {
     events?: any[]; // Modifica il tipo per riflettere che è un array
+    all_players?: string;
+    active_player?: string;
     [key: string]: any;
   };
+}
+
+// Function to extract the team based on summonerName
+function getTeamBySummonerName(summonerName: string, parsedData: any): string | null {
+  for (let player of parsedData) {
+    if (player.summonerName === summonerName) {
+      return player.team;  // Return the team if the summonerName matches
+    }
+  }
+  return null;  // Return null if no match is found
 }
 
 class BackgroundController {
@@ -39,6 +51,9 @@ class BackgroundController {
   private redSpawnAlertSent: boolean = false;
   private scuttleBotSpawnAlert: boolean = false;
   private scuttleTopSpawnAlert: boolean = false;
+
+  private team: string = null;
+  private summonerName: string = null;
 
   // Stato degli alert (di default tutti abilitati)
   private alertsEnabled = {
@@ -202,6 +217,30 @@ class BackgroundController {
       this.handleJungleCampsInfoUpdate(info.jungle_camps);
     }
 
+    if (info?.live_client_data?.all_players) {
+      if (this.summonerName !== null) {
+        //console.log('all players:', info.live_client_data.all_players);
+        const playersJson = info.live_client_data.all_players;
+  
+        // Parse the JSON string into a JavaScript object
+        const parsedData = JSON.parse(playersJson.toString());
+  
+        // Extract the "team" field
+        this.team = getTeamBySummonerName(this.summonerName, parsedData);
+
+        console.log(`Summoner ${this.summonerName} is on the ${this.team} team.`);
+      }
+    }
+
+    if (info?.live_client_data?.active_player) {
+      const activePlayerJson = info?.live_client_data?.active_player;
+
+      const parsedAP = JSON.parse(activePlayerJson);
+
+      this.summonerName = parsedAP.summonerName
+      console.log(`Summoner Name: ${this.summonerName}`);
+    }
+
     // Gestione live_client_data.events
     if (info?.live_client_data?.events) {
       console.log('live_client_data.events:', info.live_client_data.events);
@@ -248,7 +287,12 @@ class BackgroundController {
         if (iconStatus === "2" && !this.redSpawnAlertSent) {
           console.log(`Il campo ${campName} sta per spawnare!`);
           if (this.alertsEnabled.redBuff) {
-            playAudio('red-spawn.mp3');
+            if ((this.team === "ORDER" && campName.startsWith("Red East")) || 
+                (this.team === "CHAOS" && campName.startsWith("Red West"))) {
+              playAudio('red-spawn.mp3');
+            } else {
+              playAudio('enemy-red-spawn.mp3');
+            }
           }
           this.redSpawnAlertSent = true;
         } else if (iconStatus !== "2" && this.redSpawnAlertSent) {
@@ -262,7 +306,12 @@ class BackgroundController {
         if (iconStatus === "2" && !this.blueSpawnAlertSent) {
           console.log(`Il campo ${campName} sta per spawnare!`);
           if (this.alertsEnabled.blueBuff) {
-            playAudio('blue-spawn.mp3');
+            if ((this.team === "ORDER" && campName.startsWith("Blue West")) || 
+                (this.team === "CHAOS" && campName.startsWith("Blue East"))) {
+              playAudio('blue-spawn.mp3');
+            } else {
+              playAudio('enemy-blue-spawn.mp3');
+            }
           }
           this.blueSpawnAlertSent = true;
         } else if (iconStatus !== "2" && this.blueSpawnAlertSent) {
@@ -270,6 +319,7 @@ class BackgroundController {
           this.blueSpawnAlertSent = false;
         }
       }
+
 
       // Gestione dello scuttle bot side
       if (campName === "Scuttle Crab River Bot side") {
