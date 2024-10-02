@@ -287,8 +287,8 @@ class BackgroundController {
         if (iconStatus === "2" && !this.redSpawnAlertSent) {
           console.log(`Il campo ${campName} sta per spawnare!`);
           if (this.alertsEnabled.redBuff) {
-            if ((this.team === "ORDER" && campName.startsWith("Red East")) || 
-                (this.team === "CHAOS" && campName.startsWith("Red West"))) {
+            if ((this.team === "ORDER" && campName.startsWith("Red West")) || 
+                (this.team === "CHAOS" && campName.startsWith("Red East"))) {
               playAudio('red-spawn.mp3');
             } else {
               playAudio('enemy-red-spawn.mp3');
