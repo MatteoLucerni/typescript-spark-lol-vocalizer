@@ -87,14 +87,9 @@ body {
 
 /* Main */
 main {
-  display: flex;
-  flex: 1;
   position: relative;
   padding: 20px;
   box-sizing: border-box;
-  justify-content: center;
-  /* Centra il contenuto */
-  align-items: center;
 }
 
 /* Switch Container */
