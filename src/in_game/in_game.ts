@@ -4,8 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 // Definisci l'ID dell'estensione e la versione
-const EXTENSION_ID = "nhdmcdjcongmcnildlkmnkefkgcmadldmkhgplog"; // Sostituisci con il tuo reale Extension ID
-const VERSION = "1.0.0"; // Sostituisci con la tua versione attuale
+const EXTENSION_ID = "nhdmcdjcongmcnildlkmnkefkgcmadldmkhgplog";
+const VERSION = "1.0.0";
 
 // Costruisci il percorso completo per il file delle impostazioni
 const settingsFilePath = `${overwolf.io.paths.localAppData}/Overwolf/Extensions/${EXTENSION_ID}/${VERSION}/alertSettings.json`;
@@ -117,7 +117,7 @@ window.onload = () => {
         }
       } else {
         console.warn("File delle impostazioni non trovato. Utilizzo delle impostazioni predefinite.");
-        // Se il file non esiste, crea uno con le impostazioni attuali
+
         saveSettings(); // Crea il file con le impostazioni attuali
       }
     });
@@ -146,10 +146,10 @@ window.onload = () => {
   // Funzione per inviare il messaggio al background script
   function sendToggleMessage(id: string, enabled: boolean) {
     overwolf.windows.sendMessage(
-      "background", // Nome della finestra di destinazione
-      id,           // messageId
-      { enabled: enabled }, // messageContent
-      (result) => {         // callback
+      "background",
+      id,
+      { enabled: enabled },
+      (result) => {
         if (result.success) {
           console.log(`Messaggio ${id} inviato con successo`);
         } else {
