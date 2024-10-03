@@ -1,5 +1,8 @@
 // src/in_game/in_game.ts
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
 // Gestione della coda audio
 let audioQueue: string[] = [];
 let isPlaying: boolean = false;
