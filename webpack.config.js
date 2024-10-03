@@ -39,10 +39,7 @@ module.exports = env => ({
     new CleanWebpackPlugin(),
     new CopyPlugin({
       patterns: [
-        // Copia tutti i file dalla cartella 'public' alla cartella di output 'dist'
         { from: 'public', to: './' },
-        // Se vuoi copiare specificamente la cartella 'assets', puoi aggiungere:
-        // { from: "public/assets", to: "assets" },
       ],
     }),
     new HtmlWebpackPlugin({
