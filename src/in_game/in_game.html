@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="stylesheet" href="../../css/general.css" />
+  <link rel="stylesheet" href="../../css/header.css" />
   <link rel="stylesheet" href="../../css/ingame.css" />
   <link rel="stylesheet" href="../../css/modal.css" />
   <title>Spark - In-Game Page</title>
@@ -13,14 +14,10 @@
   <!-- -------------------------------- Header ------------------------------- -->
   <header id="header" class="app-header">
     <div class="header-left">
-      <img src="../../img/header_icon.svg" alt="App Icon" class="header-logo" />
+      <img src="../../img/spark-icon.svg" alt="App Icon" class="header-logo" />
       <h1>Spark LOL Vocalizer</h1>
     </div>
     <div class="header-right">
-      <h2 class="hotkey-text">
-        Show/Hide Hotkey:
-        <kbd id="hotkey">Ctrl+F</kbd>
-      </h2>
       <div class="window-controls-group">
         <button id="minimizeButton" class="window-control window-control-minimize" title="Minimize"></button>
         <button id="maximizeButton" class="window-control window-control-maximize" title="Maximize"></button>
@@ -33,38 +30,23 @@
   <main>
     <!-- Switch per abilitare/disabilitare gli alert -->
     <div class="switch-container">
-      <label>
+      <h2>Controllo Alert</h2>
+      <label class="switch-label">
         <input type="checkbox" id="toggleRedBuff" checked>
-        Abilita Alert Red Buff
+        <span class="switch-text">Red Buff</span>
       </label>
-      <label>
+      <label class="switch-label">
         <input type="checkbox" id="toggleBlueBuff" checked>
-        Abilita Alert Blue Buff
+        <span class="switch-text">Blue Buff</span>
       </label>
-      <label>
+      <label class="switch-label">
         <input type="checkbox" id="toggleScuttleBot" checked>
-        Abilita Alert Scuttle Bot
+        <span class="switch-text">Scuttle Bot</span>
       </label>
-      <label>
+      <label class="switch-label">
         <input type="checkbox" id="toggleScuttleTop" checked>
-        Abilita Alert Scuttle Top
+        <span class="switch-text">Scuttle Top</span>
       </label>
-    </div>
-
-    <!-- Sezione per i log degli eventi e degli aggiornamenti -->
-    <div id="logs" class="logs-container">
-      <div id="events" class="logColumn">
-        <h2>Eventi di Gioco</h2>
-        <div id="eventsLog" class="dataText">
-          <!-- Gli eventi di gioco verranno aggiunti qui -->
-        </div>
-      </div>
-      <div id="infoUpdates" class="logColumn">
-        <h2>Aggiornamenti delle Informazioni</h2>
-        <div id="infoLog" class="dataText">
-          <!-- Gli aggiornamenti delle informazioni verranno aggiunti qui -->
-        </div>
-      </div>
     </div>
   </main>
 </body>
