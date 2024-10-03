@@ -8,6 +8,9 @@ body {
   font-size: 14px;
   min-height: 100vh;
   color: #ffffff;
+  background-image: url('../../img/spark-logo.png');
+  background-repeat: no-repeat;
+  background-position: center;
   overflow: hidden;
   font-family: Arial, sans-serif;
   /* Assicurati che il font sia coerente */
@@ -40,7 +43,6 @@ body {
 .header-left h1 {
   margin: 0;
   font-size: 24px;
-  color: #ffffff;
   /* Testo bianco per contrasto */
 }
 
