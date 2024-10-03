@@ -1,5 +1,8 @@
 // src/in_game/in_game.ts
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
 // Gestione della coda audio
 let audioQueue: string[] = [];
 let isPlaying: boolean = false;
@@ -51,36 +54,10 @@ overwolf.windows.onMessageReceived.addListener((event) => {
       console.log(`Messaggio ricevuto per riprodurre audio: ${audioMessage.filename}`);
       enqueueAudio(audioMessage.filename);
     }
-  } else if (event.id === "game_event") {
-    const gameEvent = event.content as overwolf.games.events.GameEvent;
-    displayGameEvent(gameEvent);
-  } else if (event.id === "info_update") {
-    const infoUpdate = event.content as overwolf.games.events.InfoUpdates2Event;
-    displayInfoUpdate(infoUpdate);
   } else {
     console.log(`Messaggio non gestito: ${event.id}`);
   }
 });
-
-// Funzione per visualizzare gli eventi di gioco
-function displayGameEvent(event: overwolf.games.events.GameEvent) {
-  const eventsLog = document.getElementById("eventsLog");
-  if (eventsLog) {
-    const eventElement = document.createElement("div");
-    eventElement.textContent = JSON.stringify(event);
-    eventsLog.appendChild(eventElement);
-  }
-}
-
-// Funzione per visualizzare gli aggiornamenti delle informazioni
-function displayInfoUpdate(infoUpdate: overwolf.games.events.InfoUpdates2Event) {
-  const infoLog = document.getElementById("infoLog");
-  if (infoLog) {
-    const infoElement = document.createElement("div");
-    infoElement.textContent = JSON.stringify(infoUpdate);
-    infoLog.appendChild(infoElement);
-  }
-}
 
 window.onload = () => {
   console.log("Finestra in-game caricata correttamente.");
