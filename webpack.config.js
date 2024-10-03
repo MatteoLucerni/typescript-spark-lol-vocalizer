@@ -18,6 +18,14 @@ module.exports = env => ({
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|otf|svg|png|jpg|gif)$/,
+        type: 'asset/resource',
+      },
     ],
   },
   resolve: {
