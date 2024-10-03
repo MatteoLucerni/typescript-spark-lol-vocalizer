@@ -1,5 +1,5 @@
 // background/background.ts
 
-import { BackgroundController } from './BackgroundController';
+import { BackgroundController } from './controllers/BackgroundController';
 
 BackgroundController.instance().run();
