@@ -71,6 +71,7 @@
         "focus_game_takeover_release_hotkey": "spark_showhide",
         "resizable": true,
         "transparent": true,
+        "drag_area": true,
         "override_on_update": true,
         "size": {
           "width": 1212,
@@ -110,9 +111,11 @@
     "files": [
       "assets/dragon.mp3",
       "assets/blue-spawn.mp3",
+      "assets/enemy-blue-spawn.mp3",
       "assets/scuttle-bot-spawn.mp3",
       "assets/scuttle-top-spawn.mp3",
       "assets/red-spwan.mp3",
+      "assets/enemy-red-spwan.mp3",
       "assets/one-min-drake.mp3",
       "assets/dragon-slain.mp3",
       "assets/window-loaded.mp3"

@@ -187,3 +187,23 @@ main {
 .switch-label:hover {
   transform: translateY(-2px);
 }
+
+.volume-control {
+  margin-top: 20px;
+}
+
+.form-range {
+  width: 100%; /* Ensures the slider spans across the container */
+}
+
+.volume-control .form-label {
+  font-weight: bold;
+  margin-right: 10px;
+  color: #d32f2f;
+}
+#volumeValue {
+  color: #ffffff;
+}
+.percentage-symbol {
+  color: #ffffff;
+}

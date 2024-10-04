@@ -13,6 +13,7 @@ const settingsFilePath = `${overwolf.io.paths.localAppData}/Overwolf/Extensions/
 // Gestione della coda audio
 let audioQueue: string[] = [];
 let isPlaying: boolean = false;
+let audioVolume: number = 0.5;
 
 // Funzione per aggiungere un audio alla coda
 function enqueueAudio(filename: string) {
@@ -32,6 +33,8 @@ function playNextAudio() {
   isPlaying = true;
   const filename = audioQueue.shift();
   const audio = new Audio(`assets/${filename}`);
+  console.log(audioVolume);
+  audio.volume = audioVolume;
 
   audio.play().then(() => {
     console.log(`Audio ${filename} riprodotto con successo`);
@@ -113,6 +116,9 @@ window.onload = () => {
   const toggleBlueBuff = document.getElementById("toggleBlueBuff") as HTMLInputElement;
   const toggleScuttleBot = document.getElementById("toggleScuttleBot") as HTMLInputElement;
   const toggleScuttleTop = document.getElementById("toggleScuttleTop") as HTMLInputElement;
+  const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
+  const volumeValue = document.getElementById('volumeValue');
+
 
   // Funzione per caricare le impostazioni dagli switch usando Overwolf
   function loadSettings() {
@@ -124,12 +130,16 @@ window.onload = () => {
           toggleBlueBuff.checked = parsedSettings.blueBuff;
           toggleScuttleBot.checked = parsedSettings.scuttleBot;
           toggleScuttleTop.checked = parsedSettings.scuttleTop;
+          volumeSlider.value = parsedSettings.volume;
+          volumeValue.textContent = parsedSettings.volume;
           console.log("Impostazioni caricate correttamente.");
         } catch (error) {
           console.error('Errore nel parsing delle impostazioni:', error);
         }
       } else {
         console.warn("File delle impostazioni non trovato. Utilizzo delle impostazioni predefinite.");
+        volumeSlider.value = "50";
+        volumeValue.textContent = "50";
         // Se il file non esiste, crea uno con le impostazioni attuali
         saveSettings(); // Crea il file con le impostazioni attuali
       }
@@ -143,6 +153,7 @@ window.onload = () => {
       blueBuff: toggleBlueBuff.checked,
       scuttleBot: toggleScuttleBot.checked,
       scuttleTop: toggleScuttleTop.checked,
+      volume: volumeSlider.value,
     };
     overwolf.io.writeFileContents(settingsFilePath, JSON.stringify(settings), overwolf.io.enums.eEncoding.UTF8, false, (result) => {
       if (result.success) {
@@ -152,9 +163,6 @@ window.onload = () => {
       }
     });
   }
-
-  // Carica le impostazioni all'avvio
-  loadSettings();
 
   // Funzione per inviare il messaggio al background script
   function sendToggleMessage(id: string, enabled: boolean) {
@@ -171,6 +179,22 @@ window.onload = () => {
       }
     );
   }
+
+    // Funzione per inviare il messaggio al background script
+  function sendVolumeMessage(id: string, value: number) {
+      overwolf.windows.sendMessage(
+        "background", // Nome della finestra di destinazione
+        id,           // messageId
+        { value: value }, // messageContent
+        (result) => {         // callback
+          if (result.success) {
+            console.log(`Messaggio ${id} inviato con successo`);
+          } else {
+            console.error(`Errore nell'invio del messaggio ${id}:`, result.error);
+          }
+        }
+      );
+    }
 
   // Aggiungi event listener per ogni switch
   toggleRedBuff.addEventListener("change", () => {
@@ -192,4 +216,16 @@ window.onload = () => {
     sendToggleMessage("toggle_scuttle_top", toggleScuttleTop.checked);
     saveSettings();
   });
+
+  volumeSlider.addEventListener('input', () => {
+    const volume = volumeSlider.value;
+    volumeValue.textContent = volume; // Update the display next to the slider
+
+    // set the value in-app
+    audioVolume = parseInt(volume) / 100;
+    saveSettings();
+  });
+
+  // Carica le impostazioni all'avvio
+  loadSettings();
 };
