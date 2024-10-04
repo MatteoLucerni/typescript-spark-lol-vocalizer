@@ -33,7 +33,6 @@ function playNextAudio() {
   isPlaying = true;
   const filename = audioQueue.shift();
   const audio = new Audio(`assets/${filename}`);
-  console.log(audioVolume);
   audio.volume = audioVolume;
 
   audio.play().then(() => {
