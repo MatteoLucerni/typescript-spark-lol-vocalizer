@@ -27,6 +27,8 @@ body {
   align-items: center;
   /* Rosso principale */
   padding: 10px 20px;
+
+  -webkit-app-region: drag;
 }
 
 .header-left {
@@ -193,7 +195,8 @@ main {
 }
 
 .form-range {
-  width: 100%; /* Ensures the slider spans across the container */
+  width: 100%;
+  /* Ensures the slider spans across the container */
 }
 
 .volume-control .form-label {
@@ -201,9 +204,11 @@ main {
   margin-right: 10px;
   color: #d32f2f;
 }
+
 #volumeValue {
   color: #ffffff;
 }
+
 .percentage-symbol {
   color: #ffffff;
 }
