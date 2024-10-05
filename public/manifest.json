@@ -3,7 +3,7 @@
   "type": "WebApp",
   "meta": {
     "name": "Spark",
-    "author": "Matteo Lucerni",
+    "author": "Matteo Lucerni & Franz",
     "version": "1.0.0",
     "minimum-overwolf-version": "0.160.0",
     "description": "Customizable voice alerts for League of Legends",
@@ -86,18 +86,18 @@
     "game_targeting": {
       "type": "dedicated",
       "game_ids": [
-        5426
+        5426, 10902
       ]
     },
     "game_events": [
-      5426
+      5426, 10902
     ],
     "launch_events": [
       {
         "event": "GameLaunch",
         "event_data": {
           "game_ids": [
-            5426
+            5426, 10902
           ]
         },
         "start_minimized": true

@@ -74,7 +74,7 @@ body {
   cursor: pointer;
 
   /* Impedisce il trascinamento */
-  -webkit-app-region: no-drag;
+  -webkit-app-region: drag;
 }
 
 .window-control-minimize {
