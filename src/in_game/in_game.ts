@@ -33,18 +33,10 @@ function playNextAudio() {
   isPlaying = true;
   const filename = audioQueue.shift();
 
-  const audioContext = new (window.AudioContext)();
   const audio = new Audio(`assets/${filename}`);
-  const audioSource = audioContext.createMediaElementSource(audio);
-  const gainNode = audioContext.createGain();
+  console.log(`volume: ${audioVolume}`);
+  audio.volume = audioVolume;
 
-  // Set the volume via gain
-  gainNode.gain.value = audioVolume;
-
-  // Connect the audio source to the gain node and then to the audio context destination
-  audioSource.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-  
   audio.play().then(() => {
     console.log(`Audio ${filename} riprodotto con successo`);
   }).catch((error) => {
