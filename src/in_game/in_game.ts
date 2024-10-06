@@ -1,4 +1,13 @@
-// src/in_game/in_game.ts
+import {
+  OWGames,
+  OWGamesEvents,
+  OWHotkeys
+} from "@overwolf/overwolf-api-ts";
+
+import { AppWindow } from "../AppWindow";
+import { kHotkeys, kWindowNames, kGamesFeatures } from "../consts";
+
+import WindowState = overwolf.windows.WindowStateEx;
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -15,146 +24,159 @@ let audioQueue: string[] = [];
 let isPlaying: boolean = false;
 let audioVolume: number = 0.5;
 
-// Funzione per aggiungere un audio alla coda
-function enqueueAudio(filename: string) {
-  audioQueue.push(filename);
-  if (!isPlaying) {
-    playNextAudio();
-  }
-}
+class InGame extends AppWindow {
+  private static _instance: InGame;
+  private static count: number = 0;
+  private _gameEventsListener: OWGamesEvents;
+  private _eventsLog: HTMLElement;
+  private _infoLog: HTMLElement;
+  private toggleRedBuff: HTMLInputElement;
+  private toggleBlueBuff: HTMLInputElement;
+  private toggleScuttleBot: HTMLInputElement;
+  private toggleScuttleTop: HTMLInputElement;
+  private volumeSlider: HTMLInputElement;
+  private volumeValue: HTMLElement;
 
-// Funzione per riprodurre il prossimo audio nella coda
-function playNextAudio() {
-  if (audioQueue.length === 0) {
-    isPlaying = false;
-    return;
-  }
+  private constructor() {
+    super(kWindowNames.inGame);
 
-  isPlaying = true;
-  const filename = audioQueue.shift();
-
-  const audio = new Audio(`assets/${filename}`);
-  console.log(`volume: ${audioVolume}`);
-  audio.volume = audioVolume;
-
-  audio.play().then(() => {
-    console.log(`Audio ${filename} riprodotto con successo`);
-  }).catch((error) => {
-    console.error(`Errore nella riproduzione dell'audio ${filename}:`, error);
-    isPlaying = false;
-    playNextAudio();
-  });
-
-  audio.onended = () => {
-    isPlaying = false;
-    playNextAudio();
-  };
-
-  audio.onerror = (error) => {
-    console.error(`Errore nella riproduzione dell'audio ${filename}:`, error);
-    isPlaying = false;
-    playNextAudio();
-  };
-}
-
-// **Aggiungi questo listener per ricevere i messaggi dal background script**
-overwolf.windows.onMessageReceived.addListener((event) => {
-  if (event.id === "play_audio") {
-    const audioMessage = event.content as { filename: string };
-    if (audioMessage && audioMessage.filename) {
-      console.log(`Messaggio ricevuto per riprodurre audio: ${audioMessage.filename}`);
-      enqueueAudio(audioMessage.filename);
+    console.trace('InGame constructor called');
+    console.log(InGame.count);
+    if (InGame.count === 1) {
+      throw new Error('Trace InGame constructor');
     }
-  } else {
-    console.log(`Messaggio non gestito: ${event.id}`);
+    InGame.count += 1;
+
+    this._eventsLog = document.getElementById('eventsLog');
+    this._infoLog = document.getElementById('infoLog');
+
+    // Gestione degli switch di alert
+    this.toggleRedBuff = document.getElementById("toggleRedBuff") as HTMLInputElement;
+    this.toggleBlueBuff = document.getElementById("toggleBlueBuff") as HTMLInputElement;
+    this.toggleScuttleBot = document.getElementById("toggleScuttleBot") as HTMLInputElement;
+    this.toggleScuttleTop = document.getElementById("toggleScuttleTop") as HTMLInputElement;
+    this.volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
+    this.volumeValue = document.getElementById('volumeValue');
+
+    this.addListeners();
+
+    this.loadSettings();
+    // this.setToggleHotkeyBehavior();
+    // this.setToggleHotkeyText();
   }
-});
 
-window.onload = () => {
-  console.log("Finestra in-game caricata correttamente.");
+  public static instance() {
+    if (!this._instance) {
+      this._instance = new InGame();
+    }
 
-  // Pulsanti di controllo finestra
-  const minimizeButton = document.getElementById("minimizeButton");
-  const maximizeButton = document.getElementById("maximizeButton");
-  const closeButton = document.getElementById("closeButton");
+    return this._instance;
+  }
 
-  if (minimizeButton) {
-    minimizeButton.addEventListener("click", () => {
-      overwolf.windows.getCurrentWindow((result) => {
-        if (result.success) {
-          overwolf.windows.minimize(result.window.id);
-        }
-      });
+  // Funzione per aggiungere un audio alla coda
+  private enqueueAudio(filename: string) {
+    audioQueue.push(filename);
+    if (!isPlaying) {
+      this.playNextAudio();
+   }
+  }
+
+  // Funzione per riprodurre il prossimo audio nella coda
+  public playNextAudio() {
+    if (audioQueue.length === 0) {
+      isPlaying = false;
+      return;
+    }
+
+    isPlaying = true;
+    const filename = audioQueue.shift();
+
+    const audio = new Audio(`assets/${filename}`);
+    console.log(`volume: ${audioVolume}`);
+    audio.volume = audioVolume;
+
+    audio.play().then(() => {
+      console.log(`Audio ${filename} riprodotto con successo`);
+    }).catch((error) => {
+      console.error(`Errore nella riproduzione dell'audio ${filename}:`, error);
+      isPlaying = false;
+      this.playNextAudio();
     });
+
+    audio.onended = () => {
+      isPlaying = false;
+      this.playNextAudio();
+    };
+
+    audio.onerror = (error) => {
+      console.error(`Errore nella riproduzione dell'audio ${filename}:`, error);
+      isPlaying = false;
+      this.playNextAudio();
+    };
   }
 
-  if (maximizeButton) {
-    maximizeButton.addEventListener("click", () => {
-      overwolf.windows.getCurrentWindow((result) => {
-        if (result.success) {
-          if (result.window.state === "maximized") {
-            overwolf.windows.restore(result.window.id);
-          } else {
-            overwolf.windows.maximize(result.window.id);
-          }
+  public async run() {
+    // **Aggiungi questo listener per ricevere i messaggi dal background script**
+    overwolf.windows.onMessageReceived.addListener((event) => {
+      if (event.id === "play_audio") {
+        const audioMessage = event.content as { filename: string };
+        if (audioMessage && audioMessage.filename) {
+          console.log(`Messaggio ricevuto per riprodurre audio: ${audioMessage.filename}`);
+          this.enqueueAudio(audioMessage.filename);
         }
-      });
+      } else {
+        console.log(`Messaggio non gestito: ${event.id}`);
+      }
     });
+  
+ 
   }
-
-  if (closeButton) {
-    closeButton.addEventListener("click", () => {
-      overwolf.windows.getCurrentWindow((result) => {
-        if (result.success) {
-          overwolf.windows.close(result.window.id);
-        }
-      });
-    });
-  }
-
-  // Gestione degli switch di alert
-  const toggleRedBuff = document.getElementById("toggleRedBuff") as HTMLInputElement;
-  const toggleBlueBuff = document.getElementById("toggleBlueBuff") as HTMLInputElement;
-  const toggleScuttleBot = document.getElementById("toggleScuttleBot") as HTMLInputElement;
-  const toggleScuttleTop = document.getElementById("toggleScuttleTop") as HTMLInputElement;
-  const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
-  const volumeValue = document.getElementById('volumeValue');
-
 
   // Funzione per caricare le impostazioni dagli switch usando Overwolf
-  function loadSettings() {
+  private loadSettings() {
     overwolf.io.readFileContents(settingsFilePath, overwolf.io.enums.eEncoding.UTF8, (result) => {
       if (result.success && result.content) {
         try {
           const parsedSettings = JSON.parse(result.content);
-          toggleRedBuff.checked = parsedSettings.redBuff;
-          toggleBlueBuff.checked = parsedSettings.blueBuff;
-          toggleScuttleBot.checked = parsedSettings.scuttleBot;
-          toggleScuttleTop.checked = parsedSettings.scuttleTop;
-          volumeSlider.value = parsedSettings.volume;
-          volumeValue.textContent = parsedSettings.volume;
+          this.toggleRedBuff.checked = parsedSettings.redBuff;
+          this.toggleBlueBuff.checked = parsedSettings.blueBuff;
+          this.toggleScuttleBot.checked = parsedSettings.scuttleBot;
+          this.toggleScuttleTop.checked = parsedSettings.scuttleTop;
+          this.volumeSlider.value = parsedSettings.volume;
+          this.volumeValue.textContent = parsedSettings.volume;
+
+          // Create and dispatch change events for the checkboxes
+          const changeEvent = new Event('change');
+          this.toggleRedBuff.dispatchEvent(changeEvent);
+          this.toggleBlueBuff.dispatchEvent(changeEvent);
+          this.toggleScuttleBot.dispatchEvent(changeEvent);
+          this.toggleScuttleTop.dispatchEvent(changeEvent);
+
+          // Create and dispatch change events for the slider
+          this.volumeSlider.dispatchEvent(changeEvent);
+
           console.log("Impostazioni caricate correttamente.");
         } catch (error) {
           console.error('Errore nel parsing delle impostazioni:', error);
         }
       } else {
         console.warn("File delle impostazioni non trovato. Utilizzo delle impostazioni predefinite.");
-        volumeSlider.value = "50";
-        volumeValue.textContent = "50";
+        this.volumeSlider.value = "50";
+        this.volumeValue.textContent = "50";
         // Se il file non esiste, crea uno con le impostazioni attuali
-        saveSettings(); // Crea il file con le impostazioni attuali
+        this.saveSettings(); // Crea il file con le impostazioni attuali
       }
     });
   }
 
   // Funzione per salvare le impostazioni dagli switch usando Overwolf
-  function saveSettings() {
+  private saveSettings() {
     const settings = {
-      redBuff: toggleRedBuff.checked,
-      blueBuff: toggleBlueBuff.checked,
-      scuttleBot: toggleScuttleBot.checked,
-      scuttleTop: toggleScuttleTop.checked,
-      volume: volumeSlider.value,
+      redBuff: this.toggleRedBuff.checked,
+      blueBuff: this.toggleBlueBuff.checked,
+      scuttleBot: this.toggleScuttleBot.checked,
+      scuttleTop: this.toggleScuttleTop.checked,
+      volume: this.volumeSlider.value,
     };
     overwolf.io.writeFileContents(settingsFilePath, JSON.stringify(settings), overwolf.io.enums.eEncoding.UTF8, false, (result) => {
       if (result.success) {
@@ -165,8 +187,7 @@ window.onload = () => {
     });
   }
 
-  // Funzione per inviare il messaggio al background script
-  function sendToggleMessage(id: string, enabled: boolean) {
+  private sendToggleMessage(id: string, enabled: boolean) {
     overwolf.windows.sendMessage(
       "background", // Nome della finestra di destinazione
       id,           // messageId
@@ -181,52 +202,50 @@ window.onload = () => {
     );
   }
 
-    // Funzione per inviare il messaggio al background script
-  function sendVolumeMessage(id: string, value: number) {
-      overwolf.windows.sendMessage(
-        "background", // Nome della finestra di destinazione
-        id,           // messageId
-        { value: value }, // messageContent
-        (result) => {         // callback
-          if (result.success) {
-            console.log(`Messaggio ${id} inviato con successo`);
-          } else {
-            console.error(`Errore nell'invio del messaggio ${id}:`, result.error);
-          }
-        }
-      );
-    }
+  private addListeners() {
+    // Aggiungi event listener per ogni switch
+    this.toggleRedBuff.addEventListener("change", () => {
+      this.sendToggleMessage("toggle_red_buff", this.toggleRedBuff.checked);
+      this.saveSettings();
+    });
 
-  // Aggiungi event listener per ogni switch
-  toggleRedBuff.addEventListener("change", () => {
-    sendToggleMessage("toggle_red_buff", toggleRedBuff.checked);
-    saveSettings();
-  });
+    this.toggleBlueBuff.addEventListener("change", () => {
+      this.sendToggleMessage("toggle_blue_buff", this.toggleBlueBuff.checked);
+      this.saveSettings();
+    });
 
-  toggleBlueBuff.addEventListener("change", () => {
-    sendToggleMessage("toggle_blue_buff", toggleBlueBuff.checked);
-    saveSettings();
-  });
+    this.toggleScuttleBot.addEventListener("change", () => {
+      this.sendToggleMessage("toggle_scuttle_bot", this.toggleScuttleBot.checked);
+      this.saveSettings();
+    });
 
-  toggleScuttleBot.addEventListener("change", () => {
-    sendToggleMessage("toggle_scuttle_bot", toggleScuttleBot.checked);
-    saveSettings();
-  });
+    this.toggleScuttleTop.addEventListener("change", () => {
+      this.sendToggleMessage("toggle_scuttle_top", this.toggleScuttleTop.checked);
+      this.saveSettings();
+    });
 
-  toggleScuttleTop.addEventListener("change", () => {
-    sendToggleMessage("toggle_scuttle_top", toggleScuttleTop.checked);
-    saveSettings();
-  });
+    this.volumeSlider.addEventListener('input', () => {
+      const volume = this.volumeSlider.value;
+      this.volumeValue.textContent = volume; // Update the display next to the slider
 
-  volumeSlider.addEventListener('input', () => {
-    const volume = volumeSlider.value;
-    volumeValue.textContent = volume; // Update the display next to the slider
+      // set the value in-app
+      audioVolume = parseInt(volume) / 100;
+      this.saveSettings();
+    });
 
-    // set the value in-app
-    audioVolume = parseInt(volume) / 100;
-    saveSettings();
-  });
+    document.getElementById('testAudioButton').addEventListener('click', () => {
+      const audio = new Audio('assets/window-loaded.mp3');
 
-  // Carica le impostazioni all'avvio
-  loadSettings();
-};
+      const volume = this.volumeSlider.value;
+      this.volumeValue.textContent = volume; // Update the display next to the slider
+
+      // set the value in-app
+      audioVolume = parseInt(volume) / 100;
+      audio.volume = audioVolume;
+      console.log(`testing with volume: ${audioVolume}`);
+      audio.play();
+    });
+  }
+}
+
+InGame.instance().run();

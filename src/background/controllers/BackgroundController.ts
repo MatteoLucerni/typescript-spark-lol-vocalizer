@@ -76,7 +76,7 @@ export class BackgroundController {
     overwolf.windows.onMessageReceived.addListener(this.onMessageReceived.bind(this));
 
     // Inizializza GameEventHandlers e passa il riferimento a this
-    this.gameEventHandlers = new GameEventHandlers(this);
+    this.gameEventHandlers = new GameEventHandlers(BackgroundController.instance);
   }
 
   public static instance(): BackgroundController {
@@ -202,7 +202,6 @@ export class BackgroundController {
         const playersJson = info.live_client_data.all_players;
         const parsedData = JSON.parse(playersJson.toString());
         this.team = getTeamBySummonerName(this.summonerName, parsedData);
-        console.log(`Summoner ${this.summonerName} is on the ${this.team} team.`);
       }
     }
 
@@ -210,12 +209,11 @@ export class BackgroundController {
       const activePlayerJson = info.live_client_data.active_player;
       const parsedAP = JSON.parse(activePlayerJson);
       this.summonerName = parsedAP.summonerName;
-      console.log(`Summoner Name: ${this.summonerName}`);
     }
 
     // Gestione live_client_data.events
     if (info?.live_client_data?.events) {
-      console.log('live_client_data.events:', info.live_client_data.events);
+      // console.log('live_client_data.events:', info.live_client_data.events);
       this.gameEventHandlers.handleLiveClientData(info.live_client_data.events);
     }
 

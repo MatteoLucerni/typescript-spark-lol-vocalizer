@@ -1,5 +1,4 @@
 import {
-    OWGames,
     OWGameListener,
     OWWindow
   } from '@overwolf/overwolf-api-ts';
@@ -22,6 +21,7 @@ import { acceptReadyCheck } from './autoaccept';
     private autoAcceptEnabled = true;
   
     private constructor() {
+      console.trace('lc constructor called');
     }
   
     public static instance(): LauncherController {

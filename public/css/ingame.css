@@ -212,3 +212,26 @@ main {
 .percentage-symbol {
   color: #ffffff;
 }
+
+.audio-test-button {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.audio-test-button button {
+  background-color: #f8f9fa;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 50%;
+}
+
+.audio-test-button button:hover {
+  background-color: #e2e6ea;
+}
+
+.audio-test-button i {
+  font-size: 20px;
+  color: #007bff;
+}
