@@ -36,13 +36,10 @@ export function acceptReadyCheck(delayInSeconds = 5) {
           // Prepare the request options for the ReadyCheck accept
           const url = `https://127.0.0.1:${appPort}/lol-matchmaking/v1/ready-check/accept`;
 
-          console.log(url);
-
           overwolf.web.sendHttpRequest(url, overwolf.web.enums.HttpRequestMethods.POST, [
               { key: 'Authorization', value: `Basic ${encodedAuth}` },
               { key: 'Content-Type', value: 'application/json' }
             ], '', (result) => {
-            console.log(result)
             if (result.success) {
               console.log('Successfully accepted the ReadyCheck.');
             } else {
