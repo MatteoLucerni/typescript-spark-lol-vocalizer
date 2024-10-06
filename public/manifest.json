@@ -17,7 +17,8 @@
     "Hotkeys",
     "GameInfo",
     "GameEvents",
-    "FileSystem"
+    "FileSystem",
+    "Web"
   ],
   "data": {
     "start_window": "background",

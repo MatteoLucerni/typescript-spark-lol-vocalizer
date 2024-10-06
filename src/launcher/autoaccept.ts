@@ -1,18 +1,30 @@
-function getLeagueLockfilePath(callback) {
-  // League of Legends class ID: 5426
-  overwolf.games.getRunningGameInfo((gameInfo) => {
-    if (gameInfo && gameInfo.isRunning && gameInfo.classId === 10902) {
-      // Assuming the lockfile is located in the root directory of the game
-      const gamePath = gameInfo.executionPath;
-      const lockfilePath = `${gamePath}\\lockfile`;
-      
-      console.log('League of Legends lockfile path:', lockfilePath);
+function getAuthPortFromLaunchersInfo(callback) {
+  overwolf.games.launchers.getRunningLaunchersInfo((gameInfo) => {
+    console.log(gameInfo);
 
-      // Call the callback with the lockfile path
-      callback(lockfilePath);
-    } else {
-      console.error('League of Legends is not running.');
+    // Find the command line string from the launcher data
+    const launcher = gameInfo.launchers.find(l => l.classId === 10902);
+    if (!launcher) {
+      console.error("League of Legends launcher not found.");
+      callback(null);
+      return;
     }
+
+    let commandLine = launcher.commandLine;
+
+    // Parse the port and auth token using regular expressions
+    const portMatch = commandLine.match(/--app-port="?(\d+)"?/);
+    const authTokenMatch = commandLine.match(/--remoting-auth-token=([a-zA-Z0-9_-]+)/);
+
+    // Extract values if matches are found
+    const port: string = portMatch ? portMatch[1] : '';
+    const authToken: string = authTokenMatch ? authTokenMatch[1] : '';
+
+    // Compute the encoded key
+    const auth: string = `riot:${authToken}`;
+    const authBase64: string = btoa(auth);  // Encode to Base64 using btoa
+
+    callback(port, authBase64)
   });
 }
 
@@ -20,47 +32,23 @@ export function acceptReadyCheck(delayInSeconds = 5) {
   const delayInMilliseconds = delayInSeconds * 1000;
 
   setTimeout(() => {
-    getLeagueLockfilePath((lockfilePath) => {
-      if (!lockfilePath) {
-        console.error('Lockfile path is unavailable.');
-        return;
-      }
-
-      // Use Overwolf API to read the lockfile
-      overwolf.io.readFileContents(lockfilePath, overwolf.io.enums.eEncoding.UTF8, (result) => {
-        if (result.success) {
-          // Read the lockfile content
-          const lockfileContent = result.content;
-          const [name, pid, port, authToken, protocol] = lockfileContent.split(':');
-
-          // Create base64-encoded authentication token using btoa
-          const encodedAuth = btoa(`riot:${authToken}`);
-
+    getAuthPortFromLaunchersInfo((appPort, encodedAuth) => {
           // Prepare the request options for the ReadyCheck accept
-          const url = `https://127.0.0.1:${port}/lol-matchmaking/v1/ready-check/accept`;
+          const url = `https://127.0.0.1:${appPort}/lol-matchmaking/v1/ready-check/accept`;
 
-          // Make a POST request using fetch
-          fetch(url, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Basic ${encodedAuth}`,
-              'Content-Type': 'application/json',
-            },
-          })
-          .then(response => {
-            if (response.ok) {
-              console.log('Successfully accepted the match!');
+          console.log(url);
+
+          overwolf.web.sendHttpRequest(url, overwolf.web.enums.HttpRequestMethods.POST, [
+              { key: 'Authorization', value: `Basic ${encodedAuth}` },
+              { key: 'Content-Type', value: 'application/json' }
+            ], '', (result) => {
+            console.log(result)
+            if (result.success) {
+              console.log('Successfully accepted the ReadyCheck.');
             } else {
-              console.error('Failed to accept the match:', response.statusText);
+              console.error('Failed to accept the ReadyCheck:', result.error);
             }
-          })
-          .catch(error => {
-            console.error('Error during the request:', error);
           });
-        } else {
-          console.error('Failed to read the lockfile:', result.error);
-        }
-      });
     });
   }, delayInMilliseconds); // Delay before triggering the accept
 }
