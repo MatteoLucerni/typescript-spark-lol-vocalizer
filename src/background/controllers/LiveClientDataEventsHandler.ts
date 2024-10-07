@@ -31,6 +31,8 @@ export class LiveClientDataEventsHandler {
       newEvents.forEach(event => {
         const eventDetails = this.handleEvent(event);
         this.lastProcessedEventID = event.EventID;
+
+        processedEvents.push(eventDetails);
       });
   
       // Save the updated lastProcessedEventID (if necessary)
