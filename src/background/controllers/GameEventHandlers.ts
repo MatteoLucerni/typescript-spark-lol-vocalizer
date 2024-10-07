@@ -3,9 +3,10 @@
 import { playAudio } from '../utils/speech';
 import { formatTime } from '../utils/utils';
 import { getTeamBySummonerName } from '../utils/utils';
+import { BackgroundController } from './BackgroundController';
 
 export class GameEventHandlers {
-  private controller: any; // Riferimento a BackgroundController
+  private controller: BackgroundController; // Riferimento a BackgroundController
 
   constructor(controller: any) {
     this.controller = controller;
@@ -40,6 +41,49 @@ export class GameEventHandlers {
         console.error("Errore nell'inviare l'evento alla finestra in-game:", result.error);
       }
     });
+  }
+
+  /**
+   * Ok this is complicated so I need to write it down. According to the API, they are called "Baron"
+   * But they actually have different behavior and follow the schema:
+   * 
+   * Voidgrubs spawn at 6 mins and after that every 4 mins. HOWEVER, this only if the first group is killed before 9:45
+   * Rift Herald spawns at 14 mins and in theory it does not respawns. It DESPAWNS automatically at 19:45 (or 19:55 if in-combat)
+   * Baron spawns at 20 mins and respawns every 6 mins.
+   * 
+   * @param campInfo 
+   * 
+   */
+  private handleBaronPitInfoUpdate(campName: string, campInfo: any) {
+    const currentGameTime = this.controller.lastMatchClockTime;
+
+    try {
+      switch (campName) {
+        case "VoidGrubs":
+          // There is no event for VoidGrubs killed - so we rely on this stupid logic
+          
+          if (campInfo.alive && !this.controller.isVoidgrubsSpawned) {
+            playAudio('voidgrubs-spawned.mp3')
+            this.controller.isVoidgrubsSpawned = true;
+          }
+          break;
+        case "Rift Herald":
+          if (campInfo.alive && !this.controller.isRiftHeraldSpawned) {
+            playAudio('riftherald-spawned.mp3')
+            this.controller.isVoidgrubsSpawned = true;
+          }
+          break;
+        case "Baron":
+          if (campInfo.alive && !this.controller.isNashorSpawned) {
+            playAudio('baron-spawned.mp3')
+            this.controller.isVoidgrubsSpawned = true;
+          }
+          break;
+      }
+    } catch (error) {
+      console.error(`Errore nella gestione dell'info update baron pit ${campName} - ${campInfo}:`, error);
+    }
+
   }
 
   public handleJungleCampsInfoUpdate(jungleCampsData: any) {
@@ -130,6 +174,10 @@ export class GameEventHandlers {
           this.controller.scuttleTopSpawnAlert = false;
         }
       }
+
+      if (campName === "VoidGrubs" || campName === "Rift Herald" || campName === "Baron") {
+        this.handleBaronPitInfoUpdate(campName, campInfo);
+      }
     }
   }
 
@@ -173,5 +221,33 @@ export class GameEventHandlers {
   public sendDragonSpawnAlert() {
     console.log("Il Drago respawnerà tra un minuto!");
     playAudio('one-min-drake.mp3');
+  }
+
+
+  public checkNashorSpawnTimer(currentGameTime: number) {
+    const timeUntilNextNashorSpawn = this.controller.nextNashorSpawnTime - currentGameTime;
+
+    if (timeUntilNextNashorSpawn <= 60 && timeUntilNextNashorSpawn > 0 && !this.controller.alertSentForNextNashor) {
+      this.controller.alertSentForNextNashor = true;
+      this.sendNashorSpawnAlert();
+    }
+
+    if (timeUntilNextNashorSpawn <= 0) {
+      this.controller.alertSentForNextDragon = false;
+    }
+  }
+
+  public handleNashorKill(gameEvent: any) {
+    const currentGameTime = gameEvent.EventTime;
+    this.controller.lastNashorKillTime = currentGameTime;
+    this.controller.nextNashorSpawnTime = this.controller.lastNashorKillTime + (60 * 6); // 6 minuti dopo l'uccisione
+    this.controller.alertSentForNextNashor = false;
+    console.log(`Baron Nashor ucciso al minuto ${formatTime(this.controller.lastNashorKillTime)}. Prossimo respawn al minuto ${formatTime(this.controller.nextNashorSpawnTime)}.`);
+    playAudio('nashor-slain.mp3');
+  }
+
+  public sendNashorSpawnAlert() {
+    console.log("Il Baron Nashor respawnerà tra un minuto!");
+    playAudio('one-min-nashor.mp3');
   }
 }

@@ -13,13 +13,14 @@ import { GameEventHandlers } from './GameEventHandlers';
 
 import RunningGameInfo = overwolf.games.RunningGameInfo;
 import AppLaunchTriggeredEvent = overwolf.extensions.AppLaunchTriggeredEvent;
+import { LiveClientDataEventsHandler } from './LiveClientDataEventsHandler';
 
 interface ExtendedInfoUpdate2 extends overwolf.games.events.InfoUpdates2Event {
   jungle_camps?: {
     [key: string]: any;
   };
   live_client_data?: {
-    events?: any[];
+    events?: string;
     all_players?: string;
     active_player?: string;
     [key: string]: any;
@@ -33,12 +34,21 @@ export class BackgroundController {
 
   // Variabili di stato
   public isDragonSpawned = false;
+  
+  public isVoidgrubsSpawned = false;
+  public isRiftHeraldSpawned = false;
+  public isNashorSpawned = false;
 
   // Variabili per il timer del Drago
   public nextDragonSpawnTime: number = 300; // Il Drago spawna inizialmente a 5 minuti
   public lastDragonKillTime: number | null = null;
   public alertSentForNextDragon: boolean = false;
   public lastMatchClockTime: number = 0;
+
+  // Variabili per il timer del Nashor
+  public nextNashorSpawnTime: number = 20 * 60; // Nash spawns initially at 20 mins and then each 6 min
+  public lastNashorKillTime: number | null = null;
+  public alertSentForNextNashor: boolean = false;
 
   // Flag per evitare ripetizioni degli avvisi
   public blueSpawnAlertSent: boolean = false;
@@ -213,8 +223,14 @@ export class BackgroundController {
 
     // Gestione live_client_data.events
     if (info?.live_client_data?.events) {
-      // console.log('live_client_data.events:', info.live_client_data.events);
-      this.gameEventHandlers.handleLiveClientData(info.live_client_data.events);
+      //console.log('live_client_data.events:', info.live_client_data.events);
+      //this.gameEventHandlers.handleLiveClientData(info.live_client_data.events);
+
+      // Get the singleton instance of the handler and process the events
+      const eventHandler = LiveClientDataEventsHandler.getInstance();
+      const parsedEvents = JSON.parse(info.live_client_data.events);
+
+      eventHandler.processEvents(parsedEvents);
     }
 
     // Invia gli aggiornamenti delle informazioni alla finestra in-game solo se contiene jungle_camps
