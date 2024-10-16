@@ -87,18 +87,21 @@
     "game_targeting": {
       "type": "dedicated",
       "game_ids": [
-        5426, 10902
+        5426,
+        10902
       ]
     },
     "game_events": [
-      5426, 10902
+      5426,
+      10902
     ],
     "launch_events": [
       {
         "event": "GameLaunch",
         "event_data": {
           "game_ids": [
-            5426, 10902
+            5426,
+            10902
           ]
         },
         "start_minimized": true
@@ -111,6 +114,7 @@
     },
     "files": [
       "assets/dragon.mp3",
+      "assets/cannon-wave.mp3",
       "assets/blue-spawn.mp3",
       "assets/enemy-blue-spawn.mp3",
       "assets/scuttle-bot-spawn.mp3",
