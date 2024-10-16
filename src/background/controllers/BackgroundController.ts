@@ -55,6 +55,7 @@ export class BackgroundController {
     blueBuff: true,
     scuttleBot: true,
     scuttleTop: true,
+    cannonWave: true,
   };
 
   private gameEventHandlers: GameEventHandlers;
@@ -283,6 +284,9 @@ export class BackgroundController {
     } else if (message.id === "toggle_scuttle_top") {
       this.alertsEnabled.scuttleTop = message.content.enabled;
       console.log(`Scuttle Top alert enabled: ${this.alertsEnabled.scuttleTop}`);
+    } else if (message.id === "toggle_cannon_wave") {
+      this.alertsEnabled.cannonWave = message.content.enabled;
+      console.log(`Cannon Wave alert enabled: ${this.alertsEnabled.cannonWave}`);
     } else {
       console.log(`Messaggio non gestito: ${message.id}`);
     }

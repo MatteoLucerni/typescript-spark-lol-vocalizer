@@ -77,7 +77,9 @@ export class GameEventHandlers {
     const isSiegeWave = (waveNumber % this.siegeSpawnFrequency) === 0;
   
     if (isSiegeWave && this.lastWaveNumberAlerted !== waveNumber) {
-      playAudio('cannon-wave.mp3');
+      if (/*this.controller.alertsEnabled.cannonWave*/true) {
+        playAudio('cannon-wave.mp3');
+      }
       this.lastWaveNumberAlerted = waveNumber;
       console.log(`Siege minion spawn nella wave ${waveNumber} al minuto ${formatTime(currentGameTime)}`);
     }
