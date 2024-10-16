@@ -7,6 +7,10 @@ import { getTeamBySummonerName } from '../utils/utils';
 export class GameEventHandlers {
   private controller: any; // Riferimento a BackgroundController
 
+  private lastWaveNumberAlerted: number | null = null;
+  private siegeSpawnFrequency: number = 3; // Inizialmente ogni 3 wave
+  private currentWaveNumber: number = 0;
+
   constructor(controller: any) {
     this.controller = controller;
   }
@@ -40,6 +44,43 @@ export class GameEventHandlers {
         console.error("Errore nell'inviare l'evento alla finestra in-game:", result.error);
       }
     });
+  }
+
+  public handleMatchClock(currentGameTime: number) {
+    // Ignora se oltre i 20 minuti
+    if (currentGameTime > 1200) {
+      return;
+    }
+  
+    if (currentGameTime < 65) {
+      return; // Prima wave non ancora spawnata
+    }
+  
+    const elapsedTime = currentGameTime - 65;
+    const waveNumber = Math.floor(elapsedTime / 30) + 1;
+  
+    // Evita di ripetere per la stessa wave
+    if (waveNumber === this.currentWaveNumber) {
+      return;
+    }
+  
+    this.currentWaveNumber = waveNumber;
+  
+    // Determina la frequenza di spawn dei Siege minion
+    if (currentGameTime <= 900) { // Fino a 15 minuti
+      this.siegeSpawnFrequency = 3;
+    } else if (currentGameTime <= 1200) { // 15-20 minuti
+      this.siegeSpawnFrequency = 2;
+    }
+  
+    // Determina se questa wave include un Siege minion
+    const isSiegeWave = (waveNumber % this.siegeSpawnFrequency) === 0;
+  
+    if (isSiegeWave && this.lastWaveNumberAlerted !== waveNumber) {
+      playAudio('cannon-wave.mp3');
+      this.lastWaveNumberAlerted = waveNumber;
+      console.log(`Siege minion spawn nella wave ${waveNumber} al minuto ${formatTime(currentGameTime)}`);
+    }
   }
 
   public handleJungleCampsInfoUpdate(jungleCampsData: any) {
