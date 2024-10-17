@@ -135,7 +135,7 @@ export class GameEventHandlers {
 
   public handleLiveClientData(eventsData: any[]) {
     try {
-      if (eventsData) {
+      if (eventsData && Array.isArray(eventsData)) {
         eventsData.forEach((gameEvent: any) => {
           console.log('Evento ricevuto da live_client_data:', gameEvent);
           if (gameEvent.EventName === "DragonKill") {
