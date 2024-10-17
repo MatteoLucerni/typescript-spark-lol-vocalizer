@@ -138,23 +138,18 @@ export class BackgroundController {
     }
   }
 
-  private async setRequiredFeaturesWithRetry(requiredFeatures: string[], maxRetries: number = 10, delayMs: number = 3000): Promise<void> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  private async setRequiredFeaturesWithRetry(requiredFeatures: string[], delayMs: number = 5000): Promise<void> {
+    while (true) {
       try {
         await this.setRequiredFeatures(requiredFeatures);
         console.log('Features richieste impostate con successo:', requiredFeatures);
-        return; // Esce dalla funzione se ha successo
+        break;
       } catch (error) {
-        console.error(`Tentativo ${attempt}: Errore nell'impostare le features richieste:`, error);
-        if (attempt === maxRetries) {
-          console.error('Numero massimo di tentativi raggiunto. Le features non sono state impostate correttamente.');
-          throw error; // Rilancia l'errore dopo il massimo dei tentativi
-        }
-        // Attende prima del prossimo tentativo
         await delay(delayMs);
       }
     }
   }
+  
 
   private setRequiredFeatures(requiredFeatures: string[]): Promise<void> {
     return new Promise((resolve, reject) => {
