@@ -1,4 +1,4 @@
-// src/in_game/in_game.ts
+// in_game/in_game.ts
 
 import {
   OWGames,
