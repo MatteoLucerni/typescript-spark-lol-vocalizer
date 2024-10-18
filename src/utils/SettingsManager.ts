@@ -1,3 +1,4 @@
+// utils/SettingsManager.ts
 import { kWindowNames } from "../consts";
 
 class SettingsManager {

@@ -1,3 +1,5 @@
+// desktop.ts
+
 import { AppWindow } from "../AppWindow";
 import { kWindowNames } from "../consts";
 import { LauncherController } from "../launcher/launcher";
@@ -17,16 +19,20 @@ class Desktop extends AppWindow {
   private toggleScuttleBot: HTMLInputElement;
   private toggleScuttleTop: HTMLInputElement;
   private toggleCannonWave: HTMLInputElement;
+  private volumeSlider: HTMLInputElement;
+  private volumeValue: HTMLElement;
 
   constructor() {
     super(kWindowNames.desktop);
 
-    // Inizializza gli switch
+    // Inizializza gli switch e gli elementi del volume slider
     this.toggleRedBuff = document.getElementById("toggleRedBuff") as HTMLInputElement;
     this.toggleBlueBuff = document.getElementById("toggleBlueBuff") as HTMLInputElement;
     this.toggleScuttleBot = document.getElementById("toggleScuttleBot") as HTMLInputElement;
     this.toggleScuttleTop = document.getElementById("toggleScuttleTop") as HTMLInputElement; 
     this.toggleCannonWave = document.getElementById("toggleCannonWave") as HTMLInputElement;
+    this.volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
+    this.volumeValue = document.getElementById('volumeValue');
 
     this.addListeners();
     this.loadSettings();
@@ -40,6 +46,8 @@ class Desktop extends AppWindow {
       this.toggleScuttleBot.checked = parsedSettings.scuttleBot;
       this.toggleScuttleTop.checked = parsedSettings.scuttleTop;
       this.toggleCannonWave.checked = parsedSettings.cannonWave;
+      this.volumeSlider.value = parsedSettings.volume;
+      this.volumeValue.textContent = parsedSettings.volume;
 
       // Dispatch change events per assicurare che eventuali listener siano triggerati
       const changeEvent = new Event('change');
@@ -48,6 +56,7 @@ class Desktop extends AppWindow {
       this.toggleScuttleBot.dispatchEvent(changeEvent);
       this.toggleScuttleTop.dispatchEvent(changeEvent);
       this.toggleCannonWave.dispatchEvent(changeEvent);
+      this.volumeSlider.dispatchEvent(changeEvent);
 
       console.log("Impostazioni caricate correttamente nel desktop.");
     });
@@ -61,6 +70,7 @@ class Desktop extends AppWindow {
       scuttleBot: this.toggleScuttleBot.checked,
       scuttleTop: this.toggleScuttleTop.checked,
       cannonWave: this.toggleCannonWave.checked,
+      volume: this.volumeSlider.value,
     };
     settingsManager.saveSettings(settings);
   }
@@ -81,6 +91,7 @@ class Desktop extends AppWindow {
   }
 
   private addListeners() {
+    // Listener per gli switch
     this.toggleRedBuff.addEventListener("change", () => {
       this.sendToggleMessage("toggle_red_buff", this.toggleRedBuff.checked);
       this.saveSettings();
@@ -103,6 +114,18 @@ class Desktop extends AppWindow {
 
     this.toggleCannonWave.addEventListener("change", () => {
       this.sendToggleMessage("toggle_cannon_wave", this.toggleCannonWave.checked);
+      this.saveSettings();
+    });
+
+    // Listener per il volume slider
+    this.volumeSlider.addEventListener('input', () => {
+      const volume = this.volumeSlider.value;
+      this.volumeValue.textContent = volume; // Aggiorna la visualizzazione accanto allo slider
+
+      // Se hai bisogno di aggiornare una variabile globale del volume
+      // puoi farlo qui. Ad esempio:
+      // audioVolume = parseInt(volume) / 100;
+
       this.saveSettings();
     });
   }
