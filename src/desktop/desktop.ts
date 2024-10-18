@@ -3,6 +3,9 @@ import { kWindowNames } from "../consts";
 
 import { LauncherController } from "../launcher/launcher";
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+
 const lc = LauncherController.instance();
 
 lc.run()

@@ -37,32 +37,49 @@
     <div class="desktopBottom">
       <!-- Launch a game! -->
       <div id="left">
-        <h2>Launch League of Legends</h2>
+        <h2 class="mb-2">Launch League of Legends</h2>
         <p>
           Start a match and the In-Game window will open automatically to monitor real-time events.
         </p>
         <!-- New pane for "Toilet Mode" toggle -->
         <div class="desktopToiletMode">
-          <h3 class="toilet-mode-title">Toilet Mode</h3>
-          <label class="switch">
+          <h3 class="toilet-mode-title mb-3">Toilet Mode</h3>
+          <label class="switch mb-2">
             <input type="checkbox" id="toiletModeToggle" checked="true">
             <span class="slider round"></span>
           </label>
-          <p>Auto-accept match while performing important duties.</p>
+          <p class="mb-0">Auto-accept match while performing important duties.</p>
         </div>
       </div>
       <!-- Features -->
       <div id="middle">
-        <h2>Spark Features</h2>
-        <ul>
-          <li><strong>Real-Time Voice Alerts:</strong> Receive instant audio notifications for key game events.</li>
-          <li><strong>Comprehensive Event Monitoring:</strong> Track a wide range of events, including dragon spawns,
-            Baron Nashor kills, turret destructions, and player deaths.</li>
-          <li><strong>Customizable Notifications:</strong> Choose which events to monitor and personalize vocal messages
-            to suit your preferences.</li>
-          <li><strong>Intuitive User Interface:</strong> Easily configure settings and manage notifications through a
-            user-friendly interface.</li>
-        </ul>
+        <h2 class="mb-4">Alert Settings</h2>
+        <div class="switch-section">
+          <h6 class="switch-section-title">Jungle</h6>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="toggleRedBuff" checked>
+            <label class="form-check-label" for="toggleRedBuff">Red Buff</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="toggleBlueBuff" checked>
+            <label class="form-check-label" for="toggleBlueBuff">Blue Buff</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="toggleScuttleBot" checked>
+            <label class="form-check-label" for="toggleScuttleBot">Scuttle Bot</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="toggleScuttleTop" checked>
+            <label class="form-check-label" for="toggleScuttleTop">Scuttle Top</label>
+          </div>
+        </div>
+        <div class="switch-section mt-4">
+          <h6 class="switch-section-title">Wave</h6>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="toggleCannonWave" checked>
+            <label class="form-check-label" for="toggleCannonWave">Cannon Wave</label>
+          </div>
+        </div>
       </div>
       <!-- Image -->
       <div id="right">
