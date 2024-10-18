@@ -6,18 +6,10 @@ import {
 
 import { AppWindow } from "../AppWindow";
 import { kHotkeys, kWindowNames, kGamesFeatures } from "../consts";
-
-import WindowState = overwolf.windows.WindowStateEx;
+import { SettingsManager } from "../utils/SettingsManager";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-
-// Definisci l'ID dell'estensione e la versione
-const EXTENSION_ID = "nhdmcdjcongmcnildlkmnkefkgcmadldmkhgplog"; // Sostituisci con il tuo reale Extension ID
-const VERSION = "1.0.0"; // Sostituisci con la tua versione attuale
-
-// Costruisci il percorso completo per il file delle impostazioni
-const settingsFilePath = `${overwolf.io.paths.localAppData}/Overwolf/Extensions/${EXTENSION_ID}/${VERSION}/alertSettings.json`;
 
 // Gestione della coda audio
 let audioQueue: string[] = [];
@@ -27,8 +19,6 @@ let audioVolume: number = 0.5;
 class InGame extends AppWindow {
   private static _instance: InGame;
   private static count: number = 0;
-  private isSaving: boolean = false;
-  private saveQueue: boolean = false;
   private _gameEventsListener: OWGamesEvents;
   private _eventsLog: HTMLElement;
   private _infoLog: HTMLElement;
@@ -63,10 +53,7 @@ class InGame extends AppWindow {
     this.volumeValue = document.getElementById('volumeValue');
 
     this.addListeners();
-
     this.loadSettings();
-    // this.setToggleHotkeyBehavior();
-    // this.setToggleHotkeyText();
   }
 
   public static instance() {
@@ -132,57 +119,35 @@ class InGame extends AppWindow {
         console.log(`Messaggio non gestito: ${event.id}`);
       }
     });
-  
- 
   }
 
-  // Funzione per caricare le impostazioni dagli switch usando Overwolf
+  // Funzione per caricare le impostazioni dagli switch usando SettingsManager
   private loadSettings() {
-    overwolf.io.readFileContents(settingsFilePath, overwolf.io.enums.eEncoding.UTF8, (result) => {
-      if (result.success && result.content) {
-        try {
-          const parsedSettings = JSON.parse(result.content);
-          this.toggleRedBuff.checked = parsedSettings.redBuff;
-          this.toggleBlueBuff.checked = parsedSettings.blueBuff;
-          this.toggleScuttleBot.checked = parsedSettings.scuttleBot;
-          this.toggleScuttleTop.checked = parsedSettings.scuttleTop;
-          this.toggleCannonWave.checked = parsedSettings.cannonWave;
-          this.volumeSlider.value = parsedSettings.volume;
-          this.volumeValue.textContent = parsedSettings.volume;
+    const settingsManager = SettingsManager.instance();
+    settingsManager.loadSettings((parsedSettings) => {
+      this.toggleRedBuff.checked = parsedSettings.redBuff;
+      this.toggleBlueBuff.checked = parsedSettings.blueBuff;
+      this.toggleScuttleBot.checked = parsedSettings.scuttleBot;
+      this.toggleScuttleTop.checked = parsedSettings.scuttleTop;
+      this.toggleCannonWave.checked = parsedSettings.cannonWave;
+      this.volumeSlider.value = parsedSettings.volume;
+      this.volumeValue.textContent = parsedSettings.volume;
 
-          // Create and dispatch change events for the checkboxes
-          const changeEvent = new Event('change');
-          this.toggleRedBuff.dispatchEvent(changeEvent);
-          this.toggleBlueBuff.dispatchEvent(changeEvent);
-          this.toggleScuttleBot.dispatchEvent(changeEvent);
-          this.toggleScuttleTop.dispatchEvent(changeEvent);
-          this.toggleCannonWave.dispatchEvent(changeEvent);
+      // Dispatch change events per assicurare che eventuali listener siano triggerati
+      const changeEvent = new Event('change');
+      this.toggleRedBuff.dispatchEvent(changeEvent);
+      this.toggleBlueBuff.dispatchEvent(changeEvent);
+      this.toggleScuttleBot.dispatchEvent(changeEvent);
+      this.toggleScuttleTop.dispatchEvent(changeEvent);
+      this.toggleCannonWave.dispatchEvent(changeEvent);
+      this.volumeSlider.dispatchEvent(changeEvent);
 
-          // Create and dispatch change events for the slider
-          this.volumeSlider.dispatchEvent(changeEvent);
-
-          console.log("Impostazioni caricate correttamente.");
-        } catch (error) {
-          console.error('Errore nel parsing delle impostazioni:', error);
-        }
-      } else {
-        console.warn("File delle impostazioni non trovato. Utilizzo delle impostazioni predefinite.");
-        this.volumeSlider.value = "50";
-        this.volumeValue.textContent = "50";
-        // Se il file non esiste, crea uno con le impostazioni attuali
-        this.saveSettings(); // Crea il file con le impostazioni attuali
-      }
+      console.log("Impostazioni caricate correttamente.");
     });
   }
 
   private saveSettings() {
-    if (this.isSaving) {
-      console.warn('Salvataggio già in corso. Segnalo per un salvataggio successivo.');
-      this.saveQueue = true;
-      return;
-    }
-    this.isSaving = true;
-  
+    const settingsManager = SettingsManager.instance();
     const settings = {
       redBuff: this.toggleRedBuff.checked,
       blueBuff: this.toggleBlueBuff.checked,
@@ -191,21 +156,7 @@ class InGame extends AppWindow {
       cannonWave: this.toggleCannonWave.checked,
       volume: this.volumeSlider.value,
     };
-  
-    overwolf.io.writeFileContents(settingsFilePath, JSON.stringify(settings), overwolf.io.enums.eEncoding.UTF8, false, (result) => {
-      this.isSaving = false;
-      if (result.success) {
-        console.log('Impostazioni salvate correttamente.');
-      } else {
-        console.error('Errore nel salvare le impostazioni:', result.error);
-      }
-  
-      // Se c'è una richiesta di salvataggio in coda, eseguila ora
-      if (this.saveQueue) {
-        this.saveQueue = false;
-        this.saveSettings();
-      }
-    });
+    settingsManager.saveSettings(settings);
   }
 
   private sendToggleMessage(id: string, enabled: boolean) {
