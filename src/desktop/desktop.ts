@@ -1,4 +1,4 @@
-// desktop.ts
+// src/desktop/desktop.ts
 
 import { AppWindow } from "../AppWindow";
 import { kWindowNames } from "../consts";
