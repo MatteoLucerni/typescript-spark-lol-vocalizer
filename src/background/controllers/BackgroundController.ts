@@ -75,8 +75,7 @@ export class BackgroundController {
     // Aggiungi il listener per i messaggi dalla finestra in-game
     overwolf.windows.onMessageReceived.addListener(this.onMessageReceived.bind(this));
 
-    // Inizializza GameEventHandlers e passa il riferimento a this
-    this.gameEventHandlers = new GameEventHandlers(BackgroundController.instance);
+
   }
 
   public static instance(): BackgroundController {
@@ -88,6 +87,8 @@ export class BackgroundController {
   }
 
   public async run() {
+    // Inizializza GameEventHandlers e passa il riferimento a this
+    this.gameEventHandlers = new GameEventHandlers(BackgroundController.instance());
     this._gameListener.start();
 
     const currWindowName = (await this.isSupportedGameRunning())

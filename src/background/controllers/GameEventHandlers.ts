@@ -3,11 +3,12 @@
 import { playAudio } from '../utils/speech';
 import { formatTime } from '../utils/utils';
 import { getTeamBySummonerName } from '../utils/utils';
+import { BackgroundController } from './BackgroundController';
 
 export class GameEventHandlers {
-  private controller: any; // Riferimento a BackgroundController
+  private controller: BackgroundController; // Riferimento a BackgroundController
 
-  constructor(controller: any) {
+  constructor(controller: BackgroundController) {
     this.controller = controller;
   }
 
