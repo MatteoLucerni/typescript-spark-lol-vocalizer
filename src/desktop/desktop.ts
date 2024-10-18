@@ -128,6 +128,16 @@ class Desktop extends AppWindow {
 
       this.saveSettings();
     });
+
+    document.getElementById('testAudioButton').addEventListener('click', () => {
+      const audio = new Audio('assets/window-loaded.mp3');
+
+      const volume = this.volumeSlider.value;
+      this.volumeValue.textContent = volume; // Update the display next to the slider
+
+      audio.volume = parseInt(volume) / 100;
+      audio.play();
+    });
   }
 }
 
