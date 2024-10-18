@@ -177,7 +177,7 @@ export class BackgroundController {
       if (event.name === 'match_clock') {
         this.lastMatchClockTime = parseFloat(event.data);
         this.gameEventHandlers.checkDragonRespawnTimer(this.lastMatchClockTime);
-        this.gameEventHandlers.handleMatchClock(this.lastMatchClockTime);
+        this.gameEventHandlers.handleCannonWaveTimings(this.lastMatchClockTime);
       }
       this.gameEventHandlers.handleGameEvent(event);
     });

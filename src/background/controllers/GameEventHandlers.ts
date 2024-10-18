@@ -47,7 +47,7 @@ export class GameEventHandlers {
     });
   }
 
-  public handleMatchClock(currentGameTime: number) {
+  public handleCannonWaveTimings(currentGameTime: number) {
     // Ignora se oltre i 20 minuti
     if (currentGameTime > 1200) {
       return;
