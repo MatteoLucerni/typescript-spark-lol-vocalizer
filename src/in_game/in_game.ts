@@ -27,6 +27,8 @@ let audioVolume: number = 0.5;
 class InGame extends AppWindow {
   private static _instance: InGame;
   private static count: number = 0;
+  private isSaving: boolean = false;
+  private saveQueue: boolean = false;
   private _gameEventsListener: OWGamesEvents;
   private _eventsLog: HTMLElement;
   private _infoLog: HTMLElement;
@@ -34,6 +36,7 @@ class InGame extends AppWindow {
   private toggleBlueBuff: HTMLInputElement;
   private toggleScuttleBot: HTMLInputElement;
   private toggleScuttleTop: HTMLInputElement;
+  private toggleCannonWave: HTMLInputElement;
   private volumeSlider: HTMLInputElement;
   private volumeValue: HTMLElement;
 
@@ -54,7 +57,8 @@ class InGame extends AppWindow {
     this.toggleRedBuff = document.getElementById("toggleRedBuff") as HTMLInputElement;
     this.toggleBlueBuff = document.getElementById("toggleBlueBuff") as HTMLInputElement;
     this.toggleScuttleBot = document.getElementById("toggleScuttleBot") as HTMLInputElement;
-    this.toggleScuttleTop = document.getElementById("toggleScuttleTop") as HTMLInputElement;
+    this.toggleScuttleTop = document.getElementById("toggleScuttleTop") as HTMLInputElement; 
+    this.toggleCannonWave = document.getElementById("toggleCannonWave") as HTMLInputElement;
     this.volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
     this.volumeValue = document.getElementById('volumeValue');
 
@@ -142,6 +146,7 @@ class InGame extends AppWindow {
           this.toggleBlueBuff.checked = parsedSettings.blueBuff;
           this.toggleScuttleBot.checked = parsedSettings.scuttleBot;
           this.toggleScuttleTop.checked = parsedSettings.scuttleTop;
+          this.toggleCannonWave.checked = parsedSettings.cannonWave;
           this.volumeSlider.value = parsedSettings.volume;
           this.volumeValue.textContent = parsedSettings.volume;
 
@@ -151,6 +156,7 @@ class InGame extends AppWindow {
           this.toggleBlueBuff.dispatchEvent(changeEvent);
           this.toggleScuttleBot.dispatchEvent(changeEvent);
           this.toggleScuttleTop.dispatchEvent(changeEvent);
+          this.toggleCannonWave.dispatchEvent(changeEvent);
 
           // Create and dispatch change events for the slider
           this.volumeSlider.dispatchEvent(changeEvent);
@@ -169,20 +175,35 @@ class InGame extends AppWindow {
     });
   }
 
-  // Funzione per salvare le impostazioni dagli switch usando Overwolf
   private saveSettings() {
+    if (this.isSaving) {
+      console.warn('Salvataggio già in corso. Segnalo per un salvataggio successivo.');
+      this.saveQueue = true;
+      return;
+    }
+    this.isSaving = true;
+  
     const settings = {
       redBuff: this.toggleRedBuff.checked,
       blueBuff: this.toggleBlueBuff.checked,
       scuttleBot: this.toggleScuttleBot.checked,
       scuttleTop: this.toggleScuttleTop.checked,
+      cannonWave: this.toggleCannonWave.checked,
       volume: this.volumeSlider.value,
     };
+  
     overwolf.io.writeFileContents(settingsFilePath, JSON.stringify(settings), overwolf.io.enums.eEncoding.UTF8, false, (result) => {
+      this.isSaving = false;
       if (result.success) {
         console.log('Impostazioni salvate correttamente.');
       } else {
         console.error('Errore nel salvare le impostazioni:', result.error);
+      }
+  
+      // Se c'è una richiesta di salvataggio in coda, eseguila ora
+      if (this.saveQueue) {
+        this.saveQueue = false;
+        this.saveSettings();
       }
     });
   }
@@ -221,6 +242,11 @@ class InGame extends AppWindow {
 
     this.toggleScuttleTop.addEventListener("change", () => {
       this.sendToggleMessage("toggle_scuttle_top", this.toggleScuttleTop.checked);
+      this.saveSettings();
+    });
+
+    this.toggleCannonWave.addEventListener("change", () => {
+      this.sendToggleMessage("toggle_cannon_wave", this.toggleCannonWave.checked);
       this.saveSettings();
     });
 
