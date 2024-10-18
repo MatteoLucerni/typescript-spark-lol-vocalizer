@@ -3,15 +3,16 @@
 import { playAudio } from '../utils/speech';
 import { formatTime } from '../utils/utils';
 import { getTeamBySummonerName } from '../utils/utils';
+import { BackgroundController } from './BackgroundController';
 
 export class GameEventHandlers {
-  private controller: any; // Riferimento a BackgroundController
+  private controller: BackgroundController; // Riferimento a BackgroundController
 
   private lastWaveNumberAlerted: number | null = null;
   private siegeSpawnFrequency: number = 3; // Inizialmente ogni 3 wave
   private currentWaveNumber: number = 0;
 
-  constructor(controller: any) {
+  constructor(controller: BackgroundController) {
     this.controller = controller;
   }
 
