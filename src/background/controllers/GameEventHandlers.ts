@@ -78,7 +78,7 @@ export class GameEventHandlers {
     const isSiegeWave = (waveNumber % this.siegeSpawnFrequency) === 0;
   
     if (isSiegeWave && this.lastWaveNumberAlerted !== waveNumber) {
-      if (/*this.controller.alertsEnabled.cannonWave*/true) {
+      if (this.controller.alertsEnabled.cannonWave) {
         playAudio('cannon-wave.mp3');
       }
       this.lastWaveNumberAlerted = waveNumber;
