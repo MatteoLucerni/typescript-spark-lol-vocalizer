@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="../../css/header.css" />
   <link rel="stylesheet" href="../../css/desktop.css" />
   <link rel="stylesheet" href="../../css/modal.css" />
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
+
   <title>Spark - Desktop Page</title>
 </head>
 
@@ -81,11 +84,19 @@
           </div>
         </div>
         <!-- Volume Slider -->
-        <div class="switch-section mt-4 volume-control">
-          <h6 class="switch-section-title">Volume</h6>
-          <input type="range" class="form-range" id="volumeSlider" min="0" max="100" value="50">
-          <div class="text-center">
-            <span id="volumeValue">50</span><span class="percentage-symbol">%</span>
+        <div class="switch-section mt-4 volume-control row align-items-center">
+          <div class="col-10">
+            <h6 class="switch-section-title">Volume</h6>
+            <input type="range" class="form-range" id="volumeSlider" min="0" max="100" value="50">
+            <div class="text-center">
+              <span id="volumeValue">50</span><span class="percentage-symbol">%</span>
+            </div>
+          </div>
+          <!-- Test Audio Button -->
+          <div class="audio-test-button col-2">
+            <button id="testAudioButton" class="btn btn-light" title="Test Audio">
+              <i class="bi bi-play-fill"></i>
+            </button>
           </div>
         </div>
       </div>
