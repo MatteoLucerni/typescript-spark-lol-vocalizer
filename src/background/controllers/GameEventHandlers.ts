@@ -53,7 +53,9 @@ export class GameEventHandlers {
     console.log(`Current Gold: ${currentGold}`);
 
     if (currentGold >= 2000 && !this.goldAlertSent) {
-      playAudio('gold.mp3');
+      if (this.controller.alertsEnabled.gold) {
+        playAudio('gold.mp3');
+      }
       this.goldAlertSent = true
     }
 

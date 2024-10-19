@@ -68,6 +68,7 @@ class SettingsManager {
       scuttleBot: true,
       scuttleTop: true,
       cannonWave: true,
+      gold: true,
       volume: "100",
     };
   }

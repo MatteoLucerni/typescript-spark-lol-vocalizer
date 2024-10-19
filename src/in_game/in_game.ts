@@ -29,6 +29,7 @@ class InGame extends AppWindow {
   private toggleScuttleBot: HTMLInputElement;
   private toggleScuttleTop: HTMLInputElement;
   private toggleCannonWave: HTMLInputElement;
+  private toggleGold: HTMLInputElement;
   private volumeSlider: HTMLInputElement;
   private volumeValue: HTMLElement;
 
@@ -51,6 +52,7 @@ class InGame extends AppWindow {
     this.toggleScuttleBot = document.getElementById("toggleScuttleBot") as HTMLInputElement;
     this.toggleScuttleTop = document.getElementById("toggleScuttleTop") as HTMLInputElement; 
     this.toggleCannonWave = document.getElementById("toggleCannonWave") as HTMLInputElement;
+    this.toggleGold = document.getElementById("toggleGold") as HTMLInputElement;
     this.volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement;
     this.volumeValue = document.getElementById('volumeValue');
 
@@ -132,6 +134,7 @@ class InGame extends AppWindow {
       this.toggleScuttleBot.checked = parsedSettings.scuttleBot;
       this.toggleScuttleTop.checked = parsedSettings.scuttleTop;
       this.toggleCannonWave.checked = parsedSettings.cannonWave;
+      this.toggleGold.checked = parsedSettings.cannonWave;
       this.volumeSlider.value = parsedSettings.volume;
       this.volumeValue.textContent = parsedSettings.volume;
 
@@ -142,6 +145,7 @@ class InGame extends AppWindow {
       this.toggleScuttleBot.dispatchEvent(changeEvent);
       this.toggleScuttleTop.dispatchEvent(changeEvent);
       this.toggleCannonWave.dispatchEvent(changeEvent);
+      this.toggleGold.dispatchEvent(changeEvent);
       this.volumeSlider.dispatchEvent(changeEvent);
 
       console.log("Impostazioni caricate correttamente.");
@@ -156,6 +160,7 @@ class InGame extends AppWindow {
       scuttleBot: this.toggleScuttleBot.checked,
       scuttleTop: this.toggleScuttleTop.checked,
       cannonWave: this.toggleCannonWave.checked,
+      gold: this.toggleGold.checked,
       volume: this.volumeSlider.value,
     };
     settingsManager.saveSettings(settings);
@@ -200,6 +205,11 @@ class InGame extends AppWindow {
 
     this.toggleCannonWave.addEventListener("change", () => {
       this.sendToggleMessage("toggle_cannon_wave", this.toggleCannonWave.checked);
+      this.saveSettings();
+    });
+
+    this.toggleGold.addEventListener("change", () => {
+      this.sendToggleMessage("toggle_gold", this.toggleGold.checked);
       this.saveSettings();
     });
 

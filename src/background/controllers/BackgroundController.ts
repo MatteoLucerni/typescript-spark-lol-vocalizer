@@ -59,6 +59,7 @@ export class BackgroundController {
     scuttleBot: true,
     scuttleTop: true,
     cannonWave: true,
+    gold: true,
   };
 
   private gameEventHandlers: GameEventHandlers;
@@ -295,6 +296,9 @@ export class BackgroundController {
     } else if (message.id === "toggle_cannon_wave") {
       this.alertsEnabled.cannonWave = message.content.enabled;
       console.log(`Cannon Wave alert enabled: ${this.alertsEnabled.cannonWave}`);
+    } else if (message.id === "toggle_gold") {
+      this.alertsEnabled.gold = message.content.enabled;
+      console.log(`Gold alert enabled: ${this.alertsEnabled.gold}`);
     } else {
       console.log(`Messaggio non gestito: ${message.id}`);
     }
