@@ -114,6 +114,7 @@
     },
     "files": [
       "assets/dragon.mp3",
+      "assets/gold.mp3",
       "assets/cannon-wave.mp3",
       "assets/blue-spawn.mp3",
       "assets/enemy-blue-spawn.mp3",
