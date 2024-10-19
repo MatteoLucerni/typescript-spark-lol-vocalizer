@@ -11,6 +11,7 @@ export class GameEventHandlers {
   private lastWaveNumberAlerted: number | null = null;
   private siegeSpawnFrequency: number = 3; // Inizialmente ogni 3 wave
   private currentWaveNumber: number = 0;
+  private goldAlertSent: Boolean = false;
 
   constructor(controller: BackgroundController) {
     this.controller = controller;
@@ -45,6 +46,20 @@ export class GameEventHandlers {
         console.error("Errore nell'inviare l'evento alla finestra in-game:", result.error);
       }
     });
+  }
+
+  public handleGoldInfoUpdate(goldInfo: any) {
+    const currentGold = goldInfo.gold
+    console.log(`Current Gold: ${currentGold}`);
+
+    if (currentGold >= 2000 && !this.goldAlertSent) {
+      playAudio('gold.mp3');
+      this.goldAlertSent = true
+    }
+
+    if(currentGold < 2000 && this.goldAlertSent) {
+      this.goldAlertSent = false
+    }
   }
 
   public handleCannonWaveTimings(currentGameTime: number) {

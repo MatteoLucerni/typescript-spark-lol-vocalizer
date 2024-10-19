@@ -18,6 +18,9 @@ interface ExtendedInfoUpdate2 extends overwolf.games.events.InfoUpdates2Event {
   jungle_camps?: {
     [key: string]: any;
   };
+  game_info?: {
+    [key: string]: any;
+  };
   live_client_data?: {
     events?: any[];
     all_players?: string;
@@ -191,6 +194,17 @@ export class BackgroundController {
     // Gestione degli aggiornamenti di jungle_camps
     if (info?.jungle_camps) {
       this.gameEventHandlers.handleJungleCampsInfoUpdate(info.jungle_camps);
+    }
+
+    // Gestione degli aggiornamenti del gold
+    if (info?.game_info?.gold) {
+      console.log('info.game_info.gold:', info.game_info.gold);
+      try {
+        const goldData = JSON.parse(info.game_info.gold);
+        this.gameEventHandlers.handleGoldInfoUpdate(goldData);
+      } catch (error) {
+        console.error('Errore nel parsing di info.game_info.gold:', error);
+      }
     }
 
     if (info?.live_client_data?.all_players) {
