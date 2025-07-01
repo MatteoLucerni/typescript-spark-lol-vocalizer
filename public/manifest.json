@@ -3,7 +3,7 @@
   "type": "WebApp",
   "meta": {
     "name": "Spark",
-    "author": "Matteo Lucerni & Franz",
+    "author": "Slivehcs & Franz",
     "version": "1.0.0",
     "minimum-overwolf-version": "0.160.0",
     "description": "Customizable voice alerts for League of Legends",
